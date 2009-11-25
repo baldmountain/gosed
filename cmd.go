@@ -63,20 +63,50 @@ func NewCmd(pieces []string) (c *cmd, err os.Error) {
 	return c, err;
 }
 
-func (c *cmd) processLine(line string) (s string, stop bool, err os.Error) {
-	stop = false;
+func (c *cmd) processLine(line string) (processSpace string, stop bool, err os.Error) {
+	// setup defailt return values
+	processSpace, stop, err = line, false, nil;
 	switch c.operation {
 	case "s":
 		if debug {
 			fmt.Println("s cmd: ", c)
 		}
-		if c.flag == "g" {
-			line = c.re.ReplaceAllString(line, c.replace)
-		} else {
-		  matches := c.re.ExecuteString(line);
-		  if len(matches) > 0 {
-		    
-		  }
+		switch c.flag {
+		case "g":
+			if debug {
+				fmt.Println("cmd s with global replace")
+			}
+			processSpace = c.re.ReplaceAllString(line, c.replace);
+		default:
+			// a numeric flag command
+			matches := c.re.ExecuteString(line);
+			if len(matches) > 0 {
+  			count := 1;
+  			if len(c.flag) > 0 {
+          newCount, err := strconv.Atoi(c.flag);
+  				if err != nil {
+  					processSpace, stop, err = "", true, os.ErrorString("Invalid flag for s command");
+  					return;
+  				}
+  				count = newCount;
+  			}
+				if len(matches)/2 < count {
+					count = len(matches) / 2;
+				}
+				if debug {
+					fmt.Println("cmd s with ", count, " replace")
+				}
+				s := "";
+				j := 0;
+				for i := 0; i < count; i++ {
+					startIdx := matches[i*2];
+					endIdx := matches[i*2+1];
+					s = s + processSpace[j:startIdx] + c.replace;
+					j = endIdx;
+				}
+				s += processSpace[j:len(processSpace)];
+				processSpace = s;
+			}
 		}
 	case "q":
 		if debug {
@@ -104,7 +134,10 @@ func (c *cmd) processLine(line string) (s string, stop bool, err os.Error) {
 		line = "";
 		stop = true;
 	default:
-		c, err = nil, os.ErrorString("unknown script command")
+		line, stop, err = "", true, os.ErrorString("unknown script command")
 	}
-	return line, stop, nil;
+	if debug {
+		fmt.Println("processLine returns: ", processSpace)
+	}
+	return processSpace, stop, nil;
 }

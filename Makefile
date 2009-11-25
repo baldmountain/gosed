@@ -16,13 +16,13 @@ GOTESTFILES=\
 	sed_test.go
 
 # build "main" executable
-main: package
+sed: package
 	$(GC) -I_obj main.go
 	$(LD) -L_obj -o $@ main.$O
 	@echo "Done. Executable is: $@"
 
 clean:
-	rm -rf *.[$(OS)o] *.a [$(OS)].out _obj _test _testmain.go main
+	rm -rf *.[$(OS)o] *.a [$(OS)].out _obj _test _testmain.go sed
 
 package: _obj/$(TARG).a
 

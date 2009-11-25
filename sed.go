@@ -72,7 +72,7 @@ func readInputFile() {
 
 func parseScript() (err os.Error) {
 	// assume only one
-	commands = vector.New(0);
+	commands = new(vector.Vector);
 	// a script may be a single command or it may be several
 	scriptLines := strings.Split(*script, "\n", 0);
 	for idx, line := range scriptLines {
@@ -117,10 +117,10 @@ func process() {
 				fmt.Printf("%v\n", err);
 				os.Exit(-1);
 			}
-			patternSpace = out;
 			if stop {
 				break
 			}
+			patternSpace = out;
 		}
 		if !*quiet {
 			printPatternSpace(patternSpace)
