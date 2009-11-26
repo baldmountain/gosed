@@ -79,33 +79,33 @@ func (c *cmd) processLine(line string) (processSpace string, stop bool, err os.E
 			processSpace = c.re.ReplaceAllString(line, c.replace);
 		default:
 			// a numeric flag command
-			matches := c.re.ExecuteString(line);
-			if len(matches) > 0 {
-  			count := 1;
-  			if len(c.flag) > 0 {
-          newCount, err := strconv.Atoi(c.flag);
-  				if err != nil {
-  					processSpace, stop, err = "", true, os.ErrorString("Invalid flag for s command");
-  					return;
-  				}
-  				count = newCount;
-  			}
-				if len(matches)/2 < count {
-					count = len(matches) / 2;
+			count := 1;
+			if len(c.flag) > 0 {
+				newCount, err := strconv.Atoi(c.flag);
+				if err != nil {
+					processSpace, stop, err = "", true, os.ErrorString("Invalid flag for s command");
+					return;
 				}
-				if debug {
-					fmt.Println("cmd s with ", count, " replace")
+				count = newCount;
+			}
+			if debug {
+				fmt.Println("cmd s with ", count, " replace")
+			}
+			processSpace = "";
+			for {
+				if count <= 0 {
+					processSpace += line;
+					return;
 				}
-				s := "";
-				j := 0;
-				for i := 0; i < count; i++ {
-					startIdx := matches[i*2];
-					endIdx := matches[i*2+1];
-					s = s + processSpace[j:startIdx] + c.replace;
-					j = endIdx;
+				lineLength := len(line);
+				matches := c.re.ExecuteString(line);
+				if len(matches) == 0 {
+					processSpace += line;
+					return;
 				}
-				s += processSpace[j:len(processSpace)];
-				processSpace = s;
+				processSpace += line[0:matches[0]] + c.replace;
+				line = line[matches[1]:lineLength];
+				count--;
 			}
 		}
 	case "q":

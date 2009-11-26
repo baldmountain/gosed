@@ -21,7 +21,7 @@ func init() {
 	versionString = fmt.Sprintf("%d.%d.%d", versionMajor, versionMinor, versionPoint)
 }
 
-var show_version = flag.Bool("v", false, "Show version information.")
+//var show_version = flag.Bool("v", false, "Show version information.")
 var show_help = flag.Bool("h", false, "Show help information.")
 var quiet = flag.Bool("n", false, "Don't print the pattern space at the end of each script cycle.")
 var script = flag.String("e", "", "The script used to process the input file.")
@@ -130,9 +130,9 @@ func process() {
 
 func Main() {
 	flag.Parse();
-	if *show_version {
-		fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
-	}
+  // if *show_version {
+  //  fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
+  // }
 	if *show_help {
 		usage();
 		return;
