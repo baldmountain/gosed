@@ -21,7 +21,7 @@ func init() {
   versionString = fmt.Sprintf("%d.%d.%d", versionMajor, versionMinor, versionPoint)
 }
 
-//var show_version = flag.Bool("v", false, "Show version information.")
+var show_version = flag.Bool("v", false, "Show version information.")
 var show_help = flag.Bool("h", false, "Show help information.")
 var quiet = flag.Bool("n", false, "Don't print the pattern space at the end of each script cycle.")
 var script = flag.String("e", "", "The script used to process the input file.")
@@ -48,16 +48,6 @@ func usage() {
 var inputFilename string;
 
 func readInputFile() {
-  if flag.NArg() > 1 {
-    inputFilename = flag.Arg(1)
-  } else if flag.NArg() == 1 {
-    inputFilename = flag.Arg(0)
-  }
-  if len(inputFilename) == 0 {
-    fmt.Fprint(os.Stderr, "No input file specified.\n\n");
-    usage();
-    os.Exit(-1);
-  }
   f, err := os.Open(inputFilename, os.O_RDONLY, 0);
   if err != nil {
     fmt.Fprintf(os.Stderr, "Error opening input file %s\n", inputFilename);
@@ -130,13 +120,17 @@ func process() {
 
 func Main() {
   flag.Parse();
-  // if *show_version {
-  //  fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
-  // }
+  if *show_version {
+   fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
+  }
   if *show_help {
     usage();
     return;
   }
+  
+  // the first parameter may be a script or an input file. This helps us track which
+  currentFileParameter := 0;
+  
   // we need a script
   if len(*script) == 0 {
     // no -e so try -f
@@ -156,6 +150,8 @@ func Main() {
     } else if flag.NArg() > 1 {
       s := flag.Arg(0);
       script = &s;
+      // first parameter was the script so move to second parameter
+      currentFileParameter++;
     }
   }
 
@@ -165,25 +161,36 @@ func Main() {
     usage();
     os.Exit(-1);
   }
-
-  // actually do the processing
-  readInputFile();
+  
+  // parse script
   parseScript();
-  if *edit_inplace {
-    dir, err := os.Stat(inputFilename);
-    if err != nil {
-      fmt.Fprintf(os.Stderr, "Error getting information about input file: %s %v\n", err);
-      os.Exit(-1);
-    }
-    f, err := os.Open(inputFilename, os.O_WRONLY|os.O_TRUNC, int(dir.Mode));
-    if err != nil {
-      fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s %v\n", err);
-      os.Exit(-1);
-    }
-    outputFile = f;
+  
+  if currentFileParameter >= flag.NArg() {
+    fmt.Fprint(os.Stderr, "No input file specified.\n\n");
+    usage();
+    os.Exit(-1);
   }
-  process();
-  if *edit_inplace {
-    outputFile.Close();
-  }
+  
+  for ; currentFileParameter < flag.NArg(); currentFileParameter++ {
+    inputFilename = flag.Arg(currentFileParameter);
+    // actually do the processing
+    readInputFile();
+    if *edit_inplace {
+      dir, err := os.Stat(inputFilename);
+      if err != nil {
+        fmt.Fprintf(os.Stderr, "Error getting information about input file: %s %v\n", err);
+        os.Exit(-1);
+      }
+      f, err := os.Open(inputFilename, os.O_WRONLY|os.O_TRUNC, int(dir.Mode));
+      if err != nil {
+        fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s %v\n", err);
+        os.Exit(-1);
+      }
+      outputFile = f;
+    }
+    process();
+    if *edit_inplace {
+      outputFile.Close();
+    }
+  } 
 }
