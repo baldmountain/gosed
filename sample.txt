@@ -2,5 +2,5 @@ This is some text.
 And another Line.
 One more for good measure.
 A line with foo in it.
-Something else to make a really long line to see if it wraps properly. Just a few more chars.
+Something else to make a really long line to see if it wraps the line properly. Just a few more chars.
 Hi.

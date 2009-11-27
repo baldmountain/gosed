@@ -7,8 +7,6 @@ import (
   "regexp";
 )
 
-const debug = false
-
 type cmd struct {
   operation string;
   parameter string;
@@ -57,9 +55,6 @@ func NewCmd(pieces []string) (c *cmd, err os.Error) {
   default:
     c, err = nil, os.ErrorString("unknown script command")
   }
-  if debug {
-    fmt.Println("Created: ", c)
-  }
   return c, err;
 }
 
@@ -68,14 +63,8 @@ func (c *cmd) processLine(line string) (processSpace string, stop bool, err os.E
   processSpace, stop, err = line, false, nil;
   switch c.operation {
   case "s":
-    if debug {
-      fmt.Println("s cmd: ", c)
-    }
     switch c.flag {
     case "g":
-      if debug {
-        fmt.Println("cmd s with global replace")
-      }
       processSpace = c.re.ReplaceAllString(line, c.replace);
     default:
       // a numeric flag command
@@ -87,9 +76,6 @@ func (c *cmd) processLine(line string) (processSpace string, stop bool, err os.E
           return;
         }
         count = newCount;
-      }
-      if debug {
-        fmt.Println("cmd s with ", count, " replace")
       }
       processSpace = "";
       for {
@@ -109,9 +95,7 @@ func (c *cmd) processLine(line string) (processSpace string, stop bool, err os.E
       }
     }
   case "q":
-    if debug {
-      fmt.Println("q cmd: ", c)
-    }
+    // quit
     exitCode, err := strconv.Atoi(c.parameter);
     if err == nil {
       os.Exit(exitCode)
@@ -119,9 +103,7 @@ func (c *cmd) processLine(line string) (processSpace string, stop bool, err os.E
       os.Exit(0)
     }
   case "P":
-    if debug {
-      fmt.Println("p cmd: ", c)
-    }
+    // print output space
     fmt.Fprintln(outputFile, line);
   case "d":
     // delete the patternSpace and go onto next line
@@ -135,9 +117,6 @@ func (c *cmd) processLine(line string) (processSpace string, stop bool, err os.E
     stop = true;
   default:
     line, stop, err = "", true, os.ErrorString("unknown script command")
-  }
-  if debug {
-    fmt.Println("processLine returns: ", processSpace)
   }
   return processSpace, stop, nil;
 }

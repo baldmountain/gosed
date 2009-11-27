@@ -26,9 +26,9 @@ var show_help = flag.Bool("h", false, "Show help information.")
 var quiet = flag.Bool("n", false, "Don't print the pattern space at the end of each script cycle.")
 var script = flag.String("e", "", "The script used to process the input file.")
 var script_file = flag.String("f", "", "Specify a file to read as the script. Ignored if -e present")
-var inplace_suffix = flag.String("i", "", "This option specifies that files are to be edited in-place.")
+var edit_inplace = flag.Bool("i", false, "This option specifies that files are to be edited in-place. Otherwise output is printed to stdout.")
 var line_wrap = flag.Uint("l", 70, "Specify the default line-wrap length for the l command. A length of 0 (zero) means to never wrap long lines. If not specified, it is taken to be 70.")
-var unbuffered = flag.Bool("u", false, "Buffer both input and output as minimally as practical.")
+var unbuffered = flag.Bool("u", false, "Buffer both input and output as minimally as practical. (ignored)")
 
 // the input file split into lines
 var inputLines []string
@@ -45,8 +45,9 @@ func usage() {
   }
 }
 
+var inputFilename string;
+
 func readInputFile() {
-  var inputFilename string;
   if flag.NArg() > 1 {
     inputFilename = flag.Arg(1)
   } else if flag.NArg() == 1 {
@@ -67,6 +68,7 @@ func readInputFile() {
     fmt.Fprintf(os.Stderr, "Error reading input file %s\n", inputFilename);
     os.Exit(-1);
   }
+  _ = f.Close();
   inputLines = strings.Split(string(b), "\n", 0);
 }
 
@@ -167,5 +169,21 @@ func Main() {
   // actually do the processing
   readInputFile();
   parseScript();
+  if *edit_inplace {
+    dir, err := os.Stat(inputFilename);
+    if err != nil {
+      fmt.Fprintf(os.Stderr, "Error getting information about input file: %s %v\n", err);
+      os.Exit(-1);
+    }
+    f, err := os.Open(inputFilename, os.O_WRONLY|os.O_TRUNC, int(dir.Mode));
+    if err != nil {
+      fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s %v\n", err);
+      os.Exit(-1);
+    }
+    outputFile = f;
+  }
   process();
+  if *edit_inplace {
+    outputFile.Close();
+  }
 }
