@@ -26,6 +26,11 @@ clean:
 
 package: _obj/$(TARG).a
 
+fmt:
+	gofmt -w -tabwidth=2 -spaces=true main.go
+	gofmt -w -tabwidth=2 -spaces=true sed.go
+	gofmt -w -tabwidth=2 -spaces=true cmd.go
+
 
 # create a Go package file (.a)
 _obj/$(TARG).a: _go_.$O
