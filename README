@@ -1,0 +1,8 @@
+This is my Go language learning project. It's a basic implementation of the
+utility sed. I'm not really looking for criticism, but if someone want to help
+out turning this int a real sed I wouldn't mind.
+
+I mainly put this up as sample code for others to read. Probably not good
+sample code, but it is something.
+
+I decided on the MIT open source license. See LICENSE for more information.

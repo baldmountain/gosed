@@ -1,3 +1,28 @@
+//
+//  sed.go
+//  sed
+//
+// Copyright (c) 2009 Geoffrey Clements
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+
 package sed
 
 import (
@@ -45,7 +70,7 @@ func usage() {
   }
 }
 
-var inputFilename string;
+var inputFilename string
 
 func readInputFile() {
   f, err := os.Open(inputFilename, os.O_RDONLY, 0);
@@ -121,16 +146,16 @@ func process() {
 func Main() {
   flag.Parse();
   if *show_version {
-   fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
+    fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
   }
   if *show_help {
     usage();
     return;
   }
-  
+
   // the first parameter may be a script or an input file. This helps us track which
   currentFileParameter := 0;
-  
+
   // we need a script
   if len(*script) == 0 {
     // no -e so try -f
@@ -161,16 +186,16 @@ func Main() {
     usage();
     os.Exit(-1);
   }
-  
+
   // parse script
   parseScript();
-  
+
   if currentFileParameter >= flag.NArg() {
     fmt.Fprint(os.Stderr, "No input file specified.\n\n");
     usage();
     os.Exit(-1);
   }
-  
+
   for ; currentFileParameter < flag.NArg(); currentFileParameter++ {
     inputFilename = flag.Arg(currentFileParameter);
     // actually do the processing
@@ -190,7 +215,7 @@ func Main() {
     }
     process();
     if *edit_inplace {
-      outputFile.Close();
+      outputFile.Close()
     }
-  } 
+  }
 }
