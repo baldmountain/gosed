@@ -1,5 +1,5 @@
 //
-//  sed_test.go
+//  s_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -26,35 +26,36 @@
 package sed
 
 import (
-  "testing";
+  "os";
+  "fmt";
+  "strconv";
 )
 
-func TestProcessLine(t *testing.T) {
-  pieces := [...]string{"s", "o", "0", "g"};
-  c, _ := NewCmd(pieces[0:len(pieces)]);
-  s, stop, err := c.(Cmd).processLine("good");
-  if stop {
-    t.Error("Got stop when we shouldn't have")
-  }
-  if err != nil {
-    t.Errorf("Got and error when we shouldn't have %v", err)
-  }
-  checkString(t, "bad global s command", "g00d", s);
-
-  pieces = [...]string{"s", "o", "0", "1"};
-  c, _ = NewCmd(pieces[0:len(pieces)]);
-  s, stop, err = c.(Cmd).processLine("good");
-  if stop {
-    t.Error("Got stop when we shouldn't have")
-  }
-  if err != nil {
-    t.Errorf("Got and error when we shouldn't have %v", err)
-  }
-  checkString(t, "bad global s command", "g0od", s);
+type q_cmd struct {
+  exit_code int;
 }
 
-func checkString(t *testing.T, message, expected, actual string) {
-  if expected != actual {
-    t.Errorf("%s: '%s' != '%s'", message, expected, actual)
+func (c *q_cmd) String() string { return fmt.Sprintf("{Quit Cmd with exit code: %d}", c.exit_code) }
+
+func NewQCmd(pieces []string) (c *q_cmd, err os.Error) {
+  err = nil;
+  if len(pieces) == 2 {
+    c = new(q_cmd);
+    c.exit_code, err = strconv.Atoi(pieces[1]);
+    if err != nil {
+      c = nil
+    }
+  } else if len(pieces) == 1 {
+    c = new(q_cmd);
+    c.exit_code = 0;
+  } else {
+    c, err = nil, os.ErrorString("invalid script line")
   }
+  return c, err;
 }
+
+func (c *q_cmd) processLine(line string) (processSpace string, stop bool, err os.Error) {
+  os.Exit(c.exit_code);
+  return "", false, nil;
+}
+

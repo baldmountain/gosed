@@ -127,7 +127,7 @@ func printPatternSpace(s string) {
 func process() {
   for _, patternSpace := range inputLines {
     for c := range commands.Iter() {
-      out, stop, err := c.(*cmd).processLine(patternSpace);
+      out, stop, err := c.(Cmd).processLine(patternSpace);
       if err != nil {
         fmt.Printf("%v\n", err);
         os.Exit(-1);

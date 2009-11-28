@@ -1,5 +1,5 @@
 //
-//  sed_test.go
+//  cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -26,35 +26,18 @@
 package sed
 
 import (
-  "testing";
+  "os";
+  "fmt";
 )
 
-func TestProcessLine(t *testing.T) {
-  pieces := [...]string{"s", "o", "0", "g"};
-  c, _ := NewCmd(pieces[0:len(pieces)]);
-  s, stop, err := c.(Cmd).processLine("good");
-  if stop {
-    t.Error("Got stop when we shouldn't have")
-  }
-  if err != nil {
-    t.Errorf("Got and error when we shouldn't have %v", err)
-  }
-  checkString(t, "bad global s command", "g00d", s);
+type d_cmd struct{}
 
-  pieces = [...]string{"s", "o", "0", "1"};
-  c, _ = NewCmd(pieces[0:len(pieces)]);
-  s, stop, err = c.(Cmd).processLine("good");
-  if stop {
-    t.Error("Got stop when we shouldn't have")
-  }
-  if err != nil {
-    t.Errorf("Got and error when we shouldn't have %v", err)
-  }
-  checkString(t, "bad global s command", "g0od", s);
+func (c *d_cmd) String() string { return fmt.Sprint("{Delete Cmd}") }
+
+func (c *d_cmd) processLine(line string) (string, bool, os.Error) {
+  return "", true, nil
 }
 
-func checkString(t *testing.T, message, expected, actual string) {
-  if expected != actual {
-    t.Errorf("%s: '%s' != '%s'", message, expected, actual)
-  }
+func NewDCmd(pieces []string) (*d_cmd, os.Error) {
+  return &d_cmd{}, nil
 }

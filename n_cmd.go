@@ -1,5 +1,5 @@
 //
-//  sed_test.go
+//  cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -26,35 +26,23 @@
 package sed
 
 import (
-  "testing";
+  "os";
+  "fmt";
 )
 
-func TestProcessLine(t *testing.T) {
-  pieces := [...]string{"s", "o", "0", "g"};
-  c, _ := NewCmd(pieces[0:len(pieces)]);
-  s, stop, err := c.(Cmd).processLine("good");
-  if stop {
-    t.Error("Got stop when we shouldn't have")
-  }
-  if err != nil {
-    t.Errorf("Got and error when we shouldn't have %v", err)
-  }
-  checkString(t, "bad global s command", "g00d", s);
+type n_cmd struct{}
 
-  pieces = [...]string{"s", "o", "0", "1"};
-  c, _ = NewCmd(pieces[0:len(pieces)]);
-  s, stop, err = c.(Cmd).processLine("good");
-  if stop {
-    t.Error("Got stop when we shouldn't have")
-  }
-  if err != nil {
-    t.Errorf("Got and error when we shouldn't have %v", err)
-  }
-  checkString(t, "bad global s command", "g0od", s);
+func (c *n_cmd) String() string {
+  return fmt.Sprint("{Output pattern space and get next line Cmd}")
 }
 
-func checkString(t *testing.T, message, expected, actual string) {
-  if expected != actual {
-    t.Errorf("%s: '%s' != '%s'", message, expected, actual)
+func (c *n_cmd) processLine(line string) (string, bool, os.Error) {
+  if !*quiet {
+    printPatternSpace(line)
   }
+  return "", true, nil;
+}
+
+func NewNCmd(pieces []string) (*n_cmd, os.Error) {
+  return &n_cmd{}, nil
 }

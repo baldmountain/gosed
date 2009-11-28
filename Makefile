@@ -34,7 +34,12 @@ TARG=sed
 # source files in package
 GOFILES=\
 	sed.go \
-	cmd.go
+	cmd.go \
+	s_cmd.go \
+	d_cmd.go \
+	n_cmd.go \
+	p_cmd.go \
+	q_cmd.go
 
 # test files for this package
 GOTESTFILES=\
@@ -55,6 +60,10 @@ fmt:
 	gofmt -w -tabwidth=2 -spaces=true main.go
 	gofmt -w -tabwidth=2 -spaces=true sed.go
 	gofmt -w -tabwidth=2 -spaces=true cmd.go
+	gofmt -w -tabwidth=2 -spaces=true s_cmd.go
+	gofmt -w -tabwidth=2 -spaces=true n_cmd.go
+	gofmt -w -tabwidth=2 -spaces=true d_cmd.go
+	gofmt -w -tabwidth=2 -spaces=true p_cmd.go
 	gofmt -w -tabwidth=2 -spaces=true sed_test.go
 
 
