@@ -54,17 +54,19 @@ var script_file = flag.String("f", "", "Specify a file to read as the script. Ig
 var edit_inplace = flag.Bool("i", false, "This option specifies that files are to be edited in-place. Otherwise output is printed to stdout.")
 var line_wrap = flag.Uint("l", 70, "Specify the default line-wrap length for the l command. A length of 0 (zero) means to never wrap long lines. If not specified, it is taken to be 70.")
 var unbuffered = flag.Bool("u", false, "Buffer both input and output as minimally as practical. (ignored)")
+var treat_files_as_seperate = flag.Bool("s", false, "Treat files as searate entites. Line numbers reset to 1 for each file")
 
-var usageShown bool = false;
+var usageShown bool = false
 
 type Sed struct {
-  inputLines []string;
-  commands *vector.Vector;
-  outputFile *os.File;
+  inputLines              []string;
+  commands                *vector.Vector;
+  outputFile              *os.File;
   patternSpace, holdSpace string;
+  lineNumber              int;
 }
 
-func (s *Sed)Init() {
+func (s *Sed) Init() {
   s.commands = new(vector.Vector);
   s.outputFile = os.Stdout;
   s.patternSpace = "";
@@ -82,7 +84,7 @@ func usage() {
 
 var inputFilename string
 
-func (s *Sed)readInputFile() {
+func (s *Sed) readInputFile() {
   f, err := os.Open(inputFilename, os.O_RDONLY, 0);
   if err != nil {
     fmt.Fprintf(os.Stderr, "Error opening input file %s\n", inputFilename);
@@ -97,7 +99,7 @@ func (s *Sed)readInputFile() {
   s.inputLines = strings.Split(string(b), "\n", 0);
 }
 
-func (s *Sed)parseScript() (err os.Error) {
+func (s *Sed) parseScript() (err os.Error) {
   // a script may be a single command or it may be several
   scriptLines := strings.Split(*script, "\n", 0);
   for idx, line := range scriptLines {
@@ -118,7 +120,7 @@ func (s *Sed)parseScript() (err os.Error) {
   return nil;
 }
 
-func (s *Sed)printPatternSpace() {
+func (s *Sed) printPatternSpace() {
   l := len(s.patternSpace);
   if *line_wrap <= 0 || l < int(*line_wrap) {
     fmt.Fprintf(s.outputFile, "%s\n", s.patternSpace)
@@ -134,16 +136,24 @@ func (s *Sed)printPatternSpace() {
   }
 }
 
-func (s *Sed)process() {
+func (s *Sed) process() {
+  if *treat_files_as_seperate || *edit_inplace {
+    s.lineNumber = 0
+  }
   for _, s.patternSpace = range s.inputLines {
+    // track line number starting with line 1
+    s.lineNumber++;
     for c := range s.commands.Iter() {
-      stop, err := c.(Cmd).processLine(s);
-      if err != nil {
-        fmt.Printf("%v\n", err);
-        os.Exit(-1);
-      }
-      if stop {
-        break
+      // println("cmd: ", c.(fmt.Stringer).String());
+      if s.lineMatchesAddress(c.(Cmd).getAddress()) {
+        stop, err := c.(Cmd).processLine(s);
+        if err != nil {
+          fmt.Printf("%v\n", err);
+          os.Exit(-1);
+        }
+        if stop {
+          break
+        }
       }
     }
     if !*quiet {

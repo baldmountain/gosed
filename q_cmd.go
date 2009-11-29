@@ -32,26 +32,38 @@ import (
 )
 
 type q_cmd struct {
+  command;
   exit_code int;
 }
 
-func (c *q_cmd) String() string { return fmt.Sprintf("{Quit Cmd with exit code: %d}", c.exit_code) }
+func (c *q_cmd) String() string {
+  if c.addr != nil {
+    return fmt.Sprintf("{Quit Cmd with exit code: %d addr:%v}", c.exit_code, c.addr)
+  }
+  return fmt.Sprintf("{Quit Cmd with exit code: %d}", c.exit_code)
+}
 
-func NewQCmd(pieces []string) (c *q_cmd, err os.Error) {
+func NewQCmd(pieces []string, addr *address) (c *q_cmd, err os.Error) {
   err = nil;
   if len(pieces) == 2 {
     c = new(q_cmd);
+    c.addr = addr;
     c.exit_code, err = strconv.Atoi(pieces[1]);
     if err != nil {
       c = nil
     }
   } else if len(pieces) == 1 {
     c = new(q_cmd);
+    c.addr = addr;
     c.exit_code = 0;
   } else {
     c, err = nil, os.ErrorString("invalid script line")
   }
   return c, err;
+}
+
+func (c *q_cmd) getAddress()(*address) {
+  return c.addr;
 }
 
 func (c *q_cmd) processLine(s *Sed) (stop bool, err os.Error) {

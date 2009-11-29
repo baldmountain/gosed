@@ -33,6 +33,7 @@ import (
 )
 
 type s_cmd struct {
+  command;
   regex   string;
   replace string;
   flag    string;
@@ -41,17 +42,21 @@ type s_cmd struct {
 }
 
 func (c *s_cmd) String() string {
-  return fmt.Sprintf("{Substitue Cmd regex: %s replace: %s flag: %s}", c.regex, c.replace, c.flag)
+  if c.addr != nil {
+    return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s flag:%s addr:%v}", c.regex, c.replace, c.flag, c.addr)
+  }
+  return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s flag:%s}", c.regex, c.replace, c.flag)
 }
 
-func NewSCmd(pieces []string) (c *s_cmd, err os.Error) {
+func NewSCmd(pieces []string, addr *address) (c *s_cmd, err os.Error) {
   if len(pieces) != 4 {
     return nil, os.ErrorString("invalid script line")
   }
 
   err = nil;
   c = new(s_cmd);
-
+  c.addr = addr;
+  
   c.regex = pieces[1];
   if len(c.regex) == 0 {
     return nil, os.ErrorString("Regular expression in s command can't be zero length.")
@@ -75,6 +80,10 @@ func NewSCmd(pieces []string) (c *s_cmd, err os.Error) {
   }
 
   return c, err;
+}
+
+func (c *s_cmd) getAddress()(*address) {
+  return c.addr;
 }
 
 func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
