@@ -36,11 +36,11 @@ func (c *n_cmd) String() string {
   return fmt.Sprint("{Output pattern space and get next line Cmd}")
 }
 
-func (c *n_cmd) processLine(line string) (string, bool, os.Error) {
+func (c *n_cmd) processLine(s *Sed) (bool, os.Error) {
   if !*quiet {
-    printPatternSpace(line)
+    s.printPatternSpace()
   }
-  return "", true, nil;
+  return true, nil;
 }
 
 func NewNCmd(pieces []string) (*n_cmd, os.Error) {

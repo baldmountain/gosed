@@ -54,8 +54,8 @@ func NewQCmd(pieces []string) (c *q_cmd, err os.Error) {
   return c, err;
 }
 
-func (c *q_cmd) processLine(line string) (processSpace string, stop bool, err os.Error) {
+func (c *q_cmd) processLine(s *Sed) (stop bool, err os.Error) {
   os.Exit(c.exit_code);
-  return "", false, nil;
+  return false, nil;
 }
 

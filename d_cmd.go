@@ -34,8 +34,8 @@ type d_cmd struct{}
 
 func (c *d_cmd) String() string { return fmt.Sprint("{Delete Cmd}") }
 
-func (c *d_cmd) processLine(line string) (string, bool, os.Error) {
-  return "", true, nil
+func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {
+  return true, nil
 }
 
 func NewDCmd(pieces []string) (*d_cmd, os.Error) {

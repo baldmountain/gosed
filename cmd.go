@@ -30,7 +30,7 @@ import (
 )
 
 type Cmd interface {
-  processLine(line string) (processSpace string, stop bool, err os.Error);
+  processLine(s *Sed) (stop bool, err os.Error);
 }
 
 func NewCmd(pieces []string) (Cmd, err os.Error) {

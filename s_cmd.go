@@ -77,30 +77,31 @@ func NewSCmd(pieces []string) (c *s_cmd, err os.Error) {
   return c, err;
 }
 
-func (c *s_cmd) processLine(line string) (processSpace string, stop bool, err os.Error) {
+func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
   stop, err = false, nil;
 
   switch c.flag {
   case "g":
-    processSpace = c.re.ReplaceAllString(line, c.replace)
+    s.patternSpace = c.re.ReplaceAllString(s.patternSpace, c.replace)
   default:
     // a numeric flag command
     count := c.count;
+    line := s.patternSpace;
+    s.patternSpace = "";
     for {
       if count <= 0 {
-        processSpace += line;
+        s.patternSpace += line;
         return;
       }
-      lineLength := len(line);
       matches := c.re.ExecuteString(line);
       if len(matches) == 0 {
-        processSpace += line;
+        s.patternSpace += line;
         return;
       }
-      processSpace += line[0:matches[0]] + c.replace;
-      line = line[matches[1]:lineLength];
+      s.patternSpace += line[0:matches[0]] + c.replace;
+      line = line[matches[1]:];
       count--;
     }
   }
-  return processSpace, stop, err;
+  return stop, err;
 }

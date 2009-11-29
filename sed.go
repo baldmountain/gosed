@@ -55,11 +55,21 @@ var edit_inplace = flag.Bool("i", false, "This option specifies that files are t
 var line_wrap = flag.Uint("l", 70, "Specify the default line-wrap length for the l command. A length of 0 (zero) means to never wrap long lines. If not specified, it is taken to be 70.")
 var unbuffered = flag.Bool("u", false, "Buffer both input and output as minimally as practical. (ignored)")
 
-// the input file split into lines
-var inputLines []string
-var usageShown bool = false
-var commands = new(vector.Vector)
-var outputFile = os.Stdout
+var usageShown bool = false;
+
+type Sed struct {
+  inputLines []string;
+  commands *vector.Vector;
+  outputFile *os.File;
+  patternSpace, holdSpace string;
+}
+
+func (s *Sed)Init() {
+  s.commands = new(vector.Vector);
+  s.outputFile = os.Stdout;
+  s.patternSpace = "";
+  s.holdSpace = "";
+}
 
 func usage() {
   // only show usage once.
@@ -72,7 +82,7 @@ func usage() {
 
 var inputFilename string
 
-func readInputFile() {
+func (s *Sed)readInputFile() {
   f, err := os.Open(inputFilename, os.O_RDONLY, 0);
   if err != nil {
     fmt.Fprintf(os.Stderr, "Error opening input file %s\n", inputFilename);
@@ -84,10 +94,10 @@ func readInputFile() {
     os.Exit(-1);
   }
   _ = f.Close();
-  inputLines = strings.Split(string(b), "\n", 0);
+  s.inputLines = strings.Split(string(b), "\n", 0);
 }
 
-func parseScript() (err os.Error) {
+func (s *Sed)parseScript() (err os.Error) {
   // a script may be a single command or it may be several
   scriptLines := strings.Split(*script, "\n", 0);
   for idx, line := range scriptLines {
@@ -103,15 +113,15 @@ func parseScript() (err os.Error) {
       fmt.Printf("%v line %d: %s\n", err, idx+1, line);
       os.Exit(-1);
     }
-    commands.Push(c);
+    s.commands.Push(c);
   }
   return nil;
 }
 
-func printPatternSpace(s string) {
-  l := len(s);
+func (s *Sed)printPatternSpace() {
+  l := len(s.patternSpace);
   if *line_wrap <= 0 || l < int(*line_wrap) {
-    fmt.Fprintf(outputFile, "%s\n", s)
+    fmt.Fprintf(s.outputFile, "%s\n", s.patternSpace)
   } else {
     // print the line in segments
     for i := 0; i < l; i += int(*line_wrap) {
@@ -119,15 +129,15 @@ func printPatternSpace(s string) {
       if endOfLine > l {
         endOfLine = l
       }
-      fmt.Fprintf(outputFile, "%s\n", s[i:endOfLine]);
+      fmt.Fprintf(s.outputFile, "%s\n", s.patternSpace[i:endOfLine]);
     }
   }
 }
 
-func process() {
-  for _, patternSpace := range inputLines {
-    for c := range commands.Iter() {
-      out, stop, err := c.(Cmd).processLine(patternSpace);
+func (s *Sed)process() {
+  for _, s.patternSpace = range s.inputLines {
+    for c := range s.commands.Iter() {
+      stop, err := c.(Cmd).processLine(s);
       if err != nil {
         fmt.Printf("%v\n", err);
         os.Exit(-1);
@@ -135,15 +145,16 @@ func process() {
       if stop {
         break
       }
-      patternSpace = out;
     }
     if !*quiet {
-      printPatternSpace(patternSpace)
+      s.printPatternSpace()
     }
   }
 }
 
 func Main() {
+  s := new(Sed);
+  s.Init();
   flag.Parse();
   if *show_version {
     fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
@@ -188,7 +199,7 @@ func Main() {
   }
 
   // parse script
-  parseScript();
+  s.parseScript();
 
   if currentFileParameter >= flag.NArg() {
     fmt.Fprint(os.Stderr, "No input file specified.\n\n");
@@ -199,7 +210,7 @@ func Main() {
   for ; currentFileParameter < flag.NArg(); currentFileParameter++ {
     inputFilename = flag.Arg(currentFileParameter);
     // actually do the processing
-    readInputFile();
+    s.readInputFile();
     if *edit_inplace {
       dir, err := os.Stat(inputFilename);
       if err != nil {
@@ -211,11 +222,11 @@ func Main() {
         fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s %v\n", err);
         os.Exit(-1);
       }
-      outputFile = f;
+      s.outputFile = f;
     }
-    process();
+    s.process();
     if *edit_inplace {
-      outputFile.Close()
+      s.outputFile.Close()
     }
   }
 }

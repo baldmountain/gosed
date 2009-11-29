@@ -34,10 +34,10 @@ type p_cmd struct{}
 
 func (c *p_cmd) String() string { return fmt.Sprint("{Output pattern space Cmd}") }
 
-func (c *p_cmd) processLine(line string) (string, bool, os.Error) {
+func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
   // print output space
-  fmt.Fprintln(outputFile, line);
-  return line, false, nil;
+  fmt.Fprintln(s.outputFile, s.patternSpace);
+  return false, nil;
 }
 
 func NewPCmd(pieces []string) (*p_cmd, os.Error) {
