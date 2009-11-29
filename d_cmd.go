@@ -30,25 +30,25 @@ import (
   "fmt";
 )
 
-type d_cmd struct{ command }
+type d_cmd struct {
+  command;
+}
 
 func (c *d_cmd) String() string {
   if c.addr != nil {
     return fmt.Sprintf("{Delete Cmd addr:%v}", c.addr)
   }
-  return fmt.Sprintf("{Delete Cmd}")
+  return fmt.Sprintf("{Delete Cmd}");
 }
 
 func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {
   return true, nil
 }
 
-func (c *d_cmd) getAddress()(*address) {
-  return c.addr;
-}
+func (c *d_cmd) getAddress() *address { return c.addr }
 
 func NewDCmd(pieces []string, addr *address) (*d_cmd, os.Error) {
   cmd := new(d_cmd);
   cmd.addr = addr;
-  return cmd, nil
+  return cmd, nil;
 }

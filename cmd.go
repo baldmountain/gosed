@@ -33,17 +33,19 @@ import (
 )
 
 type Cmd interface {
-  getAddress()(*address);
+  getAddress() *address;
   processLine(s *Sed) (stop bool, err os.Error);
 }
 
 type address struct {
   lineNumber int;
-  lastLine bool;
-  regex *regexp.Regexp;
+  lastLine   bool;
+  regex      *regexp.Regexp;
 }
 
-func (a *address) String() string { return fmt.Sprintf("address{lineNumber:%d lastLine:%t regex:%v}", a.lineNumber, a.lastLine, a.regex) }
+func (a *address) String() string {
+  return fmt.Sprintf("address{lineNumber:%d lastLine:%t regex:%v}", a.lineNumber, a.lastLine, a.regex)
+}
 
 
 type command struct {
@@ -51,7 +53,7 @@ type command struct {
 }
 
 // A nil address means match any line
-func checkForAddress(s string) (*address) {
+func checkForAddress(s string) *address {
   if s == "$" {
     return &address{-1, true, nil}
   }
@@ -61,10 +63,14 @@ func checkForAddress(s string) (*address) {
   return nil;
 }
 
-func (s *Sed)lineMatchesAddress(addr *address) bool {
+func (s *Sed) lineMatchesAddress(addr *address) bool {
   if addr != nil {
-    if s.lineNumber == addr.lineNumber { return true }
-    if addr.lastLine && s.lineNumber == len(s.inputLines) { return true }
+    if s.lineNumber == addr.lineNumber {
+      return true
+    }
+    if addr.lastLine && s.lineNumber == len(s.inputLines) {
+      return true
+    }
     if addr.regex != nil {
       return addr.regex.MatchString(s.patternSpace)
     }
@@ -75,32 +81,32 @@ func (s *Sed)lineMatchesAddress(addr *address) bool {
 
 func NewCmd(pieces []string) (Cmd, os.Error) {
   retryOnce := true;
-  
+
   addr := checkForAddress(pieces[0]);
   if addr != nil {
-    pieces = pieces[1:];
+    pieces = pieces[1:]
   }
 retry:
   if retryOnce {
-  switch pieces[0] {
-  case "s":
-    return NewSCmd(pieces, addr)
-  case "q":
-    return NewQCmd(pieces, addr)
-  case "d":
-    return NewDCmd(pieces, addr)
-  case "P":
-    return NewPCmd(pieces, addr)
-  case "n":
-    return NewNCmd(pieces, addr)
+    switch pieces[0] {
+    case "s":
+      return NewSCmd(pieces, addr)
+    case "q":
+      return NewQCmd(pieces, addr)
+    case "d":
+      return NewDCmd(pieces, addr)
+    case "P":
+      return NewPCmd(pieces, addr)
+    case "n":
+      return NewNCmd(pieces, addr)
+    }
+    if re, ok := regexp.Compile(pieces[0]); ok == nil {
+      pieces = pieces[1:];
+      addr = &address{-1, false, re};
+      retryOnce = false;
+      goto retry;
+    }
   }
-  if re, ok := regexp.Compile(pieces[0]); ok == nil {
-    pieces = pieces[1:];
-    addr = &address{-1, false, re};
-    retryOnce = false;
-    goto retry
-  }
-  }
-  
+
   return nil, os.ErrorString("unknown script command");
 }

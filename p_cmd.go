@@ -30,13 +30,15 @@ import (
   "fmt";
 )
 
-type p_cmd struct{ command }
+type p_cmd struct {
+  command;
+}
 
 func (c *p_cmd) String() string {
   if c.addr != nil {
     return fmt.Sprintf("{Output pattern space Cmd addr:%v}", c.addr)
   }
-  return fmt.Sprint("{Output pattern space Cmd}")
+  return fmt.Sprint("{Output pattern space Cmd}");
 }
 
 func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
@@ -45,12 +47,10 @@ func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
   return false, nil;
 }
 
-func (c *p_cmd) getAddress()(*address) {
-  return c.addr;
-}
+func (c *p_cmd) getAddress() *address { return c.addr }
 
 func NewPCmd(pieces []string, addr *address) (*p_cmd, os.Error) {
   cmd := new(p_cmd);
   cmd.addr = addr;
-  return cmd, nil
+  return cmd, nil;
 }
