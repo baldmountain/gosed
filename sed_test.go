@@ -30,27 +30,31 @@ import (
 )
 
 func TestProcessLine(t *testing.T) {
+  _s := new(Sed);
+  _s.Init();
   pieces := [...]string{"s", "o", "0", "g"};
   c, _ := NewCmd(pieces[0:len(pieces)]);
-  s, stop, err := c.(Cmd).processLine("good");
+  _s.patternSpace = "good";
+  stop, err := c.(Cmd).processLine(_s);
   if stop {
     t.Error("Got stop when we shouldn't have")
   }
   if err != nil {
     t.Errorf("Got and error when we shouldn't have %v", err)
   }
-  checkString(t, "bad global s command", "g00d", s);
+  checkString(t, "bad global s command", "g00d", _s.patternSpace);
 
   pieces = [...]string{"s", "o", "0", "1"};
   c, _ = NewCmd(pieces[0:len(pieces)]);
-  s, stop, err = c.(Cmd).processLine("good");
+  _s.patternSpace = "good";
+  stop, err = c.(Cmd).processLine(_s);
   if stop {
     t.Error("Got stop when we shouldn't have")
   }
   if err != nil {
     t.Errorf("Got and error when we shouldn't have %v", err)
   }
-  checkString(t, "bad global s command", "g0od", s);
+  checkString(t, "bad global s command", "g0od", _s.patternSpace);
 }
 
 func checkString(t *testing.T, message, expected, actual string) {
