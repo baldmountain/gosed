@@ -29,11 +29,23 @@ import (
   "testing";
 )
 
+func TestNewCmd(t *testing.T) {
+  pieces := []string{"bad", "o", "0", "g"};
+  c, err := NewCmd(pieces);
+  if c != nil {
+    t.Error("Got a command when we shouldn't have")
+  }
+  if err == nil {
+    t.Error("No error when we expected one")
+  }
+  checkString(t, "Expected unknown script command", "unknown script command", err.String());
+}
+
 func TestProcessLine(t *testing.T) {
   _s := new(Sed);
   _s.Init();
-  pieces := [...]string{"s", "o", "0", "g"};
-  c, _ := NewCmd(pieces[0:len(pieces)]);
+  pieces := []string{"s", "o", "0", "g"};
+  c, _ := NewCmd(pieces);
   _s.patternSpace = "good";
   stop, err := c.(Cmd).processLine(_s);
   if stop {
@@ -44,8 +56,8 @@ func TestProcessLine(t *testing.T) {
   }
   checkString(t, "bad global s command", "g00d", _s.patternSpace);
 
-  pieces = [...]string{"s", "o", "0", "1"};
-  c, _ = NewCmd(pieces[0:len(pieces)]);
+  pieces = []string{"s", "o", "0", "1"};
+  c, _ = NewCmd(pieces);
   _s.patternSpace = "good";
   stop, err = c.(Cmd).processLine(_s);
   if stop {
@@ -55,6 +67,12 @@ func TestProcessLine(t *testing.T) {
     t.Errorf("Got and error when we shouldn't have %v", err)
   }
   checkString(t, "bad global s command", "g0od", _s.patternSpace);
+}
+
+func checkInt(t *testing.T, val, expected int, actual string) {
+  if expected != val {
+    t.Errorf("%s: '%d' != '%d'", val, expected, actual)
+  }
 }
 
 func checkString(t *testing.T, message, expected, actual string) {

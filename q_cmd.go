@@ -40,7 +40,7 @@ func (c *q_cmd) String() string {
   if c.addr != nil {
     return fmt.Sprintf("{Quit Cmd with exit code: %d addr:%v}", c.exit_code, c.addr)
   }
-  return fmt.Sprintf("{Quit Cmd with exit code: %d}", c.exit_code)
+  return fmt.Sprintf("{Quit Cmd with exit code: %d}", c.exit_code);
 }
 
 func NewQCmd(pieces []string, addr *address) (c *q_cmd, err os.Error) {
@@ -62,12 +62,9 @@ func NewQCmd(pieces []string, addr *address) (c *q_cmd, err os.Error) {
   return c, err;
 }
 
-func (c *q_cmd) getAddress()(*address) {
-  return c.addr;
-}
+func (c *q_cmd) getAddress() *address { return c.addr }
 
 func (c *q_cmd) processLine(s *Sed) (stop bool, err os.Error) {
   os.Exit(c.exit_code);
   return false, nil;
 }
-

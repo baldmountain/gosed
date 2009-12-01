@@ -60,10 +60,11 @@ fmt:
 	gofmt -w -tabwidth=2 -spaces=true main.go
 	gofmt -w -tabwidth=2 -spaces=true sed.go
 	gofmt -w -tabwidth=2 -spaces=true cmd.go
-	gofmt -w -tabwidth=2 -spaces=true s_cmd.go
-	gofmt -w -tabwidth=2 -spaces=true n_cmd.go
 	gofmt -w -tabwidth=2 -spaces=true d_cmd.go
+	gofmt -w -tabwidth=2 -spaces=true n_cmd.go
 	gofmt -w -tabwidth=2 -spaces=true p_cmd.go
+	gofmt -w -tabwidth=2 -spaces=true q_cmd.go
+	gofmt -w -tabwidth=2 -spaces=true s_cmd.go
 	gofmt -w -tabwidth=2 -spaces=true sed_test.go
 
 
