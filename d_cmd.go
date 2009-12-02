@@ -35,7 +35,7 @@ type d_cmd struct {
 }
 
 func (c *d_cmd) String() string {
-  if c.addr != nil {
+  if c != nil && c.addr != nil {
     return fmt.Sprintf("{Delete Cmd addr:%v}", c.addr)
   }
   return fmt.Sprintf("{Delete Cmd}");
@@ -48,6 +48,9 @@ func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {
 func (c *d_cmd) getAddress() *address { return c.addr }
 
 func NewDCmd(pieces []string, addr *address) (*d_cmd, os.Error) {
+  if len(pieces) > 1 {
+    return nil, os.ErrorString("Too many parameters to d command")
+  }
   cmd := new(d_cmd);
   cmd.addr = addr;
   return cmd, nil;

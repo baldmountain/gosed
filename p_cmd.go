@@ -35,7 +35,7 @@ type p_cmd struct {
 }
 
 func (c *p_cmd) String() string {
-  if c.addr != nil {
+  if c != nil && c.addr != nil {
     return fmt.Sprintf("{Output pattern space Cmd addr:%v}", c.addr)
   }
   return fmt.Sprint("{Output pattern space Cmd}");
@@ -50,6 +50,9 @@ func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
 func (c *p_cmd) getAddress() *address { return c.addr }
 
 func NewPCmd(pieces []string, addr *address) (*p_cmd, os.Error) {
+  if len(pieces) > 1 {
+    return nil, os.ErrorString("Too many parameters to P command")
+  }
   cmd := new(p_cmd);
   cmd.addr = addr;
   return cmd, nil;

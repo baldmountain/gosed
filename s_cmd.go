@@ -42,7 +42,7 @@ type s_cmd struct {
 }
 
 func (c *s_cmd) String() string {
-  if c.addr != nil {
+  if c != nil && c.addr != nil {
     return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s flag:%s addr:%v}", c.regex, c.replace, c.flag, c.addr)
   }
   return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s flag:%s}", c.regex, c.replace, c.flag);

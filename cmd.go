@@ -33,6 +33,7 @@ import (
 )
 
 type Cmd interface {
+  fmt.Stringer;
   getAddress() *address;
   processLine(s *Sed) (stop bool, err os.Error);
 }

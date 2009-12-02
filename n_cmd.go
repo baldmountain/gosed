@@ -35,7 +35,7 @@ type n_cmd struct {
 }
 
 func (c *n_cmd) String() string {
-  if c.addr != nil {
+  if c != nil && c.addr != nil {
     return fmt.Sprint("{Output pattern space and get next line Cmd addr:%v}", c.addr)
   }
   return fmt.Sprint("{Output pattern space and get next line Cmd}");
@@ -51,6 +51,9 @@ func (c *n_cmd) processLine(s *Sed) (bool, os.Error) {
 func (c *n_cmd) getAddress() *address { return c.addr }
 
 func NewNCmd(pieces []string, addr *address) (*n_cmd, os.Error) {
+  if len(pieces) > 1 {
+    return nil, os.ErrorString("Too many parameters to n command")
+  }
   cmd := new(n_cmd);
   cmd.addr = addr;
   return cmd, nil;
