@@ -26,6 +26,7 @@
 package sed
 
 import (
+  "runtime";
   "testing";
 )
 
@@ -33,7 +34,12 @@ func TestNewCmd(t *testing.T) {
   pieces := []string{"bad", "o", "0", "g"};
   c, err := NewCmd(pieces);
   if c != nil {
-    t.Error("1: Got a command when we shouldn't have " + c.String())
+    _, file, line, ok := runtime.Caller(0);
+    if ok {
+      t.Errorf("%s:%d: Got a command when we shouldn't have %s", file, line, c.String())
+    } else {
+      t.Error("1: Got a command when we shouldn't have " + c.String())
+    }
   }
   if err == nil {
     t.Error("Didn't get an error we expected")
@@ -242,7 +248,7 @@ func TestNewPCmd(t *testing.T) {
   } else if err != nil {
     t.Error("Got an error we didn't expect: " + err.String())
   }
-  
+
   pieces = []string{"$", "P"};
   c, err = NewCmd(pieces);
   if c.getAddress() == nil {
