@@ -33,20 +33,26 @@ import (
   "bytes";
 )
 
+const (
+  global_replace = -1;
+)
+
 type s_cmd struct {
   command;
   regex   string;
   replace []byte;
-  flag    string;
   count   int;
   re      *regexp.Regexp;
 }
 
 func (c *s_cmd) String() string {
-  if c != nil && c.addr != nil {
-    return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s flag:%s addr:%v}", c.regex, c.replace, c.flag, c.addr)
+  if c != nil {
+    if c.addr != nil {
+      return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d addr:%v}", c.regex, c.replace, c.count, c.addr)
+    }
+    return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d}", c.regex, c.replace, c.count);
   }
-  return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s flag:%s}", c.regex, c.replace, c.flag);
+  return "{Substitue Cmd}";
 }
 
 func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
@@ -69,15 +75,17 @@ func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
 
   c.replace = pieces[2];
 
-  c.flag = string(pieces[3]);
-  if c.flag != "g" {
+  flag := string(pieces[3]);
+  if flag != "g" {
     c.count = 1;
-    if len(c.flag) > 0 {
-      c.count, err = strconv.Atoi(c.flag);
+    if len(flag) > 0 {
+      c.count, err = strconv.Atoi(flag);
       if err != nil {
         return nil, os.ErrorString("Invalid flag for s command " + err.String())
       }
     }
+  } else {
+    c.count = global_replace
   }
 
   return c, err;
@@ -88,8 +96,8 @@ func (c *s_cmd) getAddress() *address { return c.addr }
 func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
   stop, err = false, nil;
 
-  switch c.flag {
-  case "g":
+  switch c.count {
+  case global_replace:
     s.patternSpace = c.re.ReplaceAll(s.patternSpace, c.replace)
   default:
     // a numeric flag command

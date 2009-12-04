@@ -67,7 +67,7 @@ func TestNewCmd(t *testing.T) {
   sc := c.(*s_cmd);
   if sc == nil {
     t.Error("Didn't get a command that we expected")
-  } else if sc.regex != "o" && len(sc.replace) == 1 && sc.replace[0] == '0' && sc.flag == "g" && sc.count == -1 {
+  } else if sc.regex != "o" && len(sc.replace) == 1 && sc.replace[0] == '0' && sc.count == -1 {
     t.Error("We didn't get the s command we expected")
   } else if err != nil {
     t.Error("Got an error we didn't expect: " + err.String())
