@@ -28,7 +28,7 @@ package sed
 import (
   "flag";
   "fmt";
-  "io";
+  "io/ioutil";
   "os";
   "strings";
   "container/vector";
@@ -85,17 +85,11 @@ func usage() {
 var inputFilename string
 
 func (s *Sed) readInputFile() {
-  f, err := os.Open(inputFilename, os.O_RDONLY, 0);
-  if err != nil {
-    fmt.Fprintf(os.Stderr, "Error opening input file %s\n", inputFilename);
-    os.Exit(-1);
-  }
-  b, err := io.ReadAll(f);
+  b, err := ioutil.ReadFile(inputFilename);
   if err != nil {
     fmt.Fprintf(os.Stderr, "Error reading input file %s\n", inputFilename);
     os.Exit(-1);
   }
-  _ = f.Close();
   s.inputLines = strings.Split(string(b), "\n", 0);
 }
 
@@ -181,12 +175,7 @@ func Main() {
   if len(*script) == 0 {
     // no -e so try -f
     if len(*script_file) > 0 {
-      f, err := os.Open(*script_file, os.O_RDONLY, 0);
-      if err != nil {
-        fmt.Fprintf(os.Stderr, "Error opening file %s\n", *script_file);
-        os.Exit(-1);
-      }
-      b, _ := io.ReadAll(f);
+      b, err := ioutil.ReadFile(*script_file);
       if err != nil {
         fmt.Fprintf(os.Stderr, "Error reading script file %s\n", *script_file);
         os.Exit(-1);
