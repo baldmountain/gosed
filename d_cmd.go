@@ -47,7 +47,7 @@ func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {
 
 func (c *d_cmd) getAddress() *address { return c.addr }
 
-func NewDCmd(pieces []string, addr *address) (*d_cmd, os.Error) {
+func NewDCmd(pieces [][]byte, addr *address) (*d_cmd, os.Error) {
   if len(pieces) > 1 {
     return nil, os.ErrorString("Too many parameters to d command")
   }

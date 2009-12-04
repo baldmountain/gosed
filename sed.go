@@ -31,6 +31,7 @@ import (
   "io/ioutil";
   "os";
   "strings";
+  "bytes";
   "container/vector";
 )
 
@@ -59,18 +60,18 @@ var treat_files_as_seperate = flag.Bool("s", false, "Treat files as searate enti
 var usageShown bool = false
 
 type Sed struct {
-  inputLines              []string;
+  inputLines              [][]byte;
   commands                *vector.Vector;
   outputFile              *os.File;
-  patternSpace, holdSpace string;
+  patternSpace, holdSpace []byte;
   lineNumber              int;
 }
 
 func (s *Sed) Init() {
   s.commands = new(vector.Vector);
   s.outputFile = os.Stdout;
-  s.patternSpace = "";
-  s.holdSpace = "";
+  s.patternSpace = make([]byte, 0);
+  s.holdSpace = make([]byte, 0);
 }
 
 func usage() {
@@ -90,20 +91,20 @@ func (s *Sed) readInputFile() {
     fmt.Fprintf(os.Stderr, "Error reading input file %s\n", inputFilename);
     os.Exit(-1);
   }
-  s.inputLines = strings.Split(string(b), "\n", 0);
+  s.inputLines = bytes.Split(b, []byte{'\n'}, 0);
 }
 
-func (s *Sed) parseScript() (err os.Error) {
+func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
   // a script may be a single command or it may be several
-  scriptLines := strings.Split(*script, "\n", 0);
+  scriptLines := bytes.Split(scriptBuffer, []byte{'\n'}, 0);
   for idx, line := range scriptLines {
-    line = strings.TrimSpace(line);
-    if strings.HasPrefix(line, "#") || len(line) == 0 {
+    line = bytes.TrimSpace(line);
+    if bytes.HasPrefix(line, []byte{'#'}) || len(line) == 0 {
       // comment
       continue
     }
     // this isn't really right. There may be slashes in the regular expression
-    pieces := strings.Split(line, "/", 0);
+    pieces := bytes.Split(line, []byte{'/'}, 0);
     c, err := NewCmd(pieces);
     if err != nil {
       fmt.Printf("%v line %d: %s\n", err, idx+1, line);
@@ -170,35 +171,36 @@ func Main() {
 
   // the first parameter may be a script or an input file. This helps us track which
   currentFileParameter := 0;
+  var scriptBuffer []byte = make([]byte, 0);
 
   // we need a script
   if len(*script) == 0 {
     // no -e so try -f
     if len(*script_file) > 0 {
-      b, err := ioutil.ReadFile(*script_file);
+      sb, err := ioutil.ReadFile(*script_file);
       if err != nil {
         fmt.Fprintf(os.Stderr, "Error reading script file %s\n", *script_file);
         os.Exit(-1);
       }
-      s := string(b);
-      script = &s;
+      scriptBuffer = sb;
     } else if flag.NArg() > 1 {
-      s := flag.Arg(0);
-      script = &s;
+      scriptBuffer = strings.Bytes(flag.Arg(0));
       // first parameter was the script so move to second parameter
       currentFileParameter++;
     }
+  } else {
+    scriptBuffer = strings.Bytes(*script)
   }
 
   // if script still isn't set we are screwed, exit.
-  if len(*script) == 0 {
+  if len(scriptBuffer) == 0 {
     fmt.Fprint(os.Stderr, "No script found.\n\n");
     usage();
     os.Exit(-1);
   }
 
   // parse script
-  s.parseScript();
+  s.parseScript(scriptBuffer);
 
   if currentFileParameter >= flag.NArg() {
     fmt.Fprint(os.Stderr, "No input file specified.\n\n");

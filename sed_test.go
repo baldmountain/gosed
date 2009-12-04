@@ -31,7 +31,7 @@ import (
 )
 
 func TestNewCmd(t *testing.T) {
-  pieces := []string{"bad", "o", "0", "g"};
+  pieces := [][]byte{[]byte{'b', 'a', 'd'}, []byte{'o'}, []byte{'0'}, []byte{'g'}};
   c, err := NewCmd(pieces);
   if c != nil {
     _, file, line, ok := runtime.Caller(0);
@@ -47,7 +47,7 @@ func TestNewCmd(t *testing.T) {
     checkString(t, "Expected unknown script command", "unknown script command", err.String())
   }
 
-  pieces = []string{"4r5", "o", "0", "g"};
+  pieces = [][]byte{[]byte{'4', 'r', '5'}, []byte{'o'}, []byte{'0'}, []byte{'g'}};
   c, err = NewCmd(pieces);
   if c != nil {
     t.Error("2: Got a command when we shouldn't have " + c.String())
@@ -59,7 +59,7 @@ func TestNewCmd(t *testing.T) {
   }
 
   // s
-  pieces = []string{"s", "o", "0", "g"};
+  pieces = [][]byte{[]byte{'s'}, []byte{'o'}, []byte{'0'}, []byte{'g'}};
   c, err = NewCmd(pieces);
   if c.getAddress() != nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -67,7 +67,7 @@ func TestNewCmd(t *testing.T) {
   sc := c.(*s_cmd);
   if sc == nil {
     t.Error("Didn't get a command that we expected")
-  } else if sc.regex != "o" && sc.replace == "0" && sc.flag == "g" && sc.count == -1 {
+  } else if sc.regex != "o" && len(sc.replace) == 1 && sc.replace[0] == '0' && sc.flag == "g" && sc.count == -1 {
     t.Error("We didn't get the s command we expected")
   } else if err != nil {
     t.Error("Got an error we didn't expect: " + err.String())
@@ -75,7 +75,7 @@ func TestNewCmd(t *testing.T) {
 }
 
 func TestNewDCmd(t *testing.T) {
-  pieces := []string{"d", "o", "0", "g"};
+  pieces := [][]byte{[]byte{'d'}, []byte{'o'}, []byte{'0'}, []byte{'g'}};
   c, err := NewCmd(pieces);
   dc := c.(*d_cmd);
   if dc != nil {
@@ -87,7 +87,7 @@ func TestNewDCmd(t *testing.T) {
     checkString(t, "Expected: Too many parameters to d command", "Too many parameters to d command", err.String())
   }
 
-  pieces = []string{"d", "d"};
+  pieces = [][]byte{[]byte{'d'}, []byte{'d'}};
   c, err = NewCmd(pieces);
   dc = c.(*d_cmd);
   if dc != nil {
@@ -99,7 +99,7 @@ func TestNewDCmd(t *testing.T) {
     checkString(t, "Expected: Too many parameters to d command", "Too many parameters to d command", err.String())
   }
 
-  pieces = []string{"d"};
+  pieces = [][]byte{[]byte{'d'}};
   c, err = NewCmd(pieces);
   if c.getAddress() != nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -111,7 +111,7 @@ func TestNewDCmd(t *testing.T) {
     t.Error("Got an error we didn't expect: " + err.String())
   }
 
-  pieces = []string{"$", "d"};
+  pieces = [][]byte{[]byte{'$'}, []byte{'d'}};
   c, err = NewCmd(pieces);
   if c.getAddress() == nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -125,7 +125,7 @@ func TestNewDCmd(t *testing.T) {
     t.Error("Got an error we didn't expect: " + err.String())
   }
 
-  pieces = []string{"457", "d"};
+  pieces = [][]byte{[]byte{'4', '5', '7'}, []byte{'d'}};
   c, err = NewCmd(pieces);
   if c.getAddress() == nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -141,7 +141,7 @@ func TestNewDCmd(t *testing.T) {
 }
 
 func TestNewNCmd(t *testing.T) {
-  pieces := []string{"n", "o", "0", "g"};
+  pieces := [][]byte{[]byte{'n'}, []byte{'o'}, []byte{'0'}, []byte{'g'}};
   c, err := NewCmd(pieces);
   nc := c.(*n_cmd);
   if nc != nil {
@@ -156,7 +156,7 @@ func TestNewNCmd(t *testing.T) {
     checkString(t, "Expected: Too many parameters to d command", "Too many parameters to n command", err.String())
   }
 
-  pieces = []string{"n", "d"};
+  pieces = [][]byte{[]byte{'n'}, []byte{'d'}};
   c, err = NewCmd(pieces);
   nc = c.(*n_cmd);
   if nc != nil {
@@ -168,7 +168,7 @@ func TestNewNCmd(t *testing.T) {
     checkString(t, "Expected: Too many parameters to d command", "Too many parameters to n command", err.String())
   }
 
-  pieces = []string{"n"};
+  pieces = [][]byte{[]byte{'n'}};
   c, err = NewCmd(pieces);
   if c.getAddress() != nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -180,7 +180,7 @@ func TestNewNCmd(t *testing.T) {
     t.Error("Got an error we didn't expect: " + err.String())
   }
 
-  pieces = []string{"$", "n"};
+  pieces = [][]byte{[]byte{'$'}, []byte{'n'}};
   c, err = NewCmd(pieces);
   if c.getAddress() == nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -194,7 +194,7 @@ func TestNewNCmd(t *testing.T) {
     t.Error("Got an error we didn't expect: " + err.String())
   }
 
-  pieces = []string{"457", "n"};
+  pieces = [][]byte{[]byte{'4', '5', '7'}, []byte{'n'}};
   c, err = NewCmd(pieces);
   if c.getAddress() == nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -210,7 +210,7 @@ func TestNewNCmd(t *testing.T) {
 }
 
 func TestNewPCmd(t *testing.T) {
-  pieces := []string{"P", "o", "0", "g"};
+  pieces := [][]byte{[]byte{'P'}, []byte{'o'}, []byte{'0'}, []byte{'g'}};
   c, err := NewCmd(pieces);
   pc := c.(*p_cmd);
   if pc != nil {
@@ -225,7 +225,7 @@ func TestNewPCmd(t *testing.T) {
     checkString(t, "Expected: Too many parameters to p command", "Too many parameters to P command", err.String())
   }
 
-  pieces = []string{"P", "d"};
+  pieces = [][]byte{[]byte{'P'}, []byte{'d'}};
   c, err = NewCmd(pieces);
   pc = c.(*p_cmd);
   if pc != nil {
@@ -237,7 +237,7 @@ func TestNewPCmd(t *testing.T) {
     checkString(t, "Expected: Too many parameters to p command", "Too many parameters to P command", err.String())
   }
 
-  pieces = []string{"P"};
+  pieces = [][]byte{[]byte{'P'}};
   c, err = NewCmd(pieces);
   if c.getAddress() != nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -249,7 +249,7 @@ func TestNewPCmd(t *testing.T) {
     t.Error("Got an error we didn't expect: " + err.String())
   }
 
-  pieces = []string{"$", "P"};
+  pieces = [][]byte{[]byte{'$'}, []byte{'P'}};
   c, err = NewCmd(pieces);
   if c.getAddress() == nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -263,7 +263,7 @@ func TestNewPCmd(t *testing.T) {
     t.Error("Got an error we didn't expect: " + err.String())
   }
 
-  pieces = []string{"457", "P"};
+  pieces = [][]byte{[]byte{'4', '5', '7'}, []byte{'P'}};
   c, err = NewCmd(pieces);
   if c.getAddress() == nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -279,7 +279,7 @@ func TestNewPCmd(t *testing.T) {
 }
 
 func TestNewQCmd(t *testing.T) {
-  pieces := []string{"q", "o", "0", "g"};
+  pieces := [][]byte{[]byte{'q'}, []byte{'o'}, []byte{'0'}, []byte{'g'}};
   c, err := NewCmd(pieces);
   qc := c.(*q_cmd);
   if qc != nil {
@@ -291,7 +291,7 @@ func TestNewQCmd(t *testing.T) {
     checkString(t, "Expected: Too many parameters to q command", "Too many parameters to q command", err.String())
   }
 
-  pieces = []string{"q", "q"};
+  pieces = [][]byte{[]byte{'q'}, []byte{'q'}};
   c, err = NewCmd(pieces);
   qc = c.(*q_cmd);
   if qc != nil {
@@ -303,7 +303,7 @@ func TestNewQCmd(t *testing.T) {
     checkString(t, "Expected: parsing q: invalid argument", "parsing q: invalid argument", err.String())
   }
 
-  pieces = []string{"q"};
+  pieces = [][]byte{[]byte{'q'}};
   c, err = NewCmd(pieces);
   if c.getAddress() != nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -315,7 +315,7 @@ func TestNewQCmd(t *testing.T) {
     t.Error("Got an error we didn't expect: " + err.String())
   }
 
-  pieces = []string{"q", "1"};
+  pieces = [][]byte{[]byte{'q'}, []byte{'1'}};
   c, err = NewCmd(pieces);
   if c.getAddress() != nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -327,7 +327,7 @@ func TestNewQCmd(t *testing.T) {
     t.Error("Got an error we didn't expect: " + err.String())
   }
 
-  pieces = []string{"$", "q"};
+  pieces = [][]byte{[]byte{'$'}, []byte{'q'}};
   c, err = NewCmd(pieces);
   if c.getAddress() == nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -341,7 +341,7 @@ func TestNewQCmd(t *testing.T) {
     t.Error("Got an error we didn't expect: " + err.String())
   }
 
-  pieces = []string{"457", "q"};
+  pieces = [][]byte{[]byte{'4', '5', '7'}, []byte{'q'}};
   c, err = NewCmd(pieces);
   if c.getAddress() == nil {
     t.Error("Got an address when we shouldn't have " + c.String())
@@ -359,9 +359,9 @@ func TestNewQCmd(t *testing.T) {
 func TestProcessLine(t *testing.T) {
   _s := new(Sed);
   _s.Init();
-  pieces := []string{"s", "o", "0", "g"};
+  pieces := [][]byte{[]byte{'s'}, []byte{'o'}, []byte{'0'}, []byte{'g'}};
   c, _ := NewCmd(pieces);
-  _s.patternSpace = "good";
+  _s.patternSpace = []byte{'g', 'o', 'o', 'd'};
   stop, err := c.(Cmd).processLine(_s);
   if stop {
     t.Error("Got stop when we shouldn't have")
@@ -369,11 +369,11 @@ func TestProcessLine(t *testing.T) {
   if err != nil {
     t.Errorf("Got and error when we shouldn't have %v", err)
   }
-  checkString(t, "bad global s command", "g00d", _s.patternSpace);
+  checkString(t, "bad global s command", "g00d", string(_s.patternSpace));
 
-  pieces = []string{"s", "o", "0", "1"};
+  pieces = [][]byte{[]byte{'s'}, []byte{'o'}, []byte{'0'}, []byte{'1'}};
   c, _ = NewCmd(pieces);
-  _s.patternSpace = "good";
+  _s.patternSpace = []byte{'g', 'o', 'o', 'd'};
   stop, err = c.(Cmd).processLine(_s);
   if stop {
     t.Error("Got stop when we shouldn't have")
@@ -381,7 +381,7 @@ func TestProcessLine(t *testing.T) {
   if err != nil {
     t.Errorf("Got and error when we shouldn't have %v", err)
   }
-  checkString(t, "bad global s command", "g0od", _s.patternSpace);
+  checkString(t, "bad global s command", "g0od", string(_s.patternSpace));
 }
 
 func checkInt(t *testing.T, val, expected int, actual string) {

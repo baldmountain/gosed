@@ -43,13 +43,13 @@ func (c *p_cmd) String() string {
 
 func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
   // print output space
-  fmt.Fprintln(s.outputFile, s.patternSpace);
+  fmt.Fprintln(s.outputFile, string(s.patternSpace));
   return false, nil;
 }
 
 func (c *p_cmd) getAddress() *address { return c.addr }
 
-func NewPCmd(pieces []string, addr *address) (*p_cmd, os.Error) {
+func NewPCmd(pieces [][]byte, addr *address) (*p_cmd, os.Error) {
   if len(pieces) > 1 {
     return nil, os.ErrorString("Too many parameters to P command")
   }

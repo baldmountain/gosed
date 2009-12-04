@@ -54,11 +54,11 @@ type command struct {
 }
 
 // A nil address means match any line
-func checkForAddress(s string) *address {
-  if s == "$" {
+func checkForAddress(s []byte) *address {
+  if len(s) > 0 && s[0] == '$' {
     return &address{-1, true, nil}
   }
-  if ln, ok := strconv.Atoi(s); ok == nil {
+  if ln, ok := strconv.Atoi(string(s)); ok == nil {
     return &address{ln, false, nil}
   }
   return nil;
@@ -73,39 +73,41 @@ func (s *Sed) lineMatchesAddress(addr *address) bool {
       return true
     }
     if addr.regex != nil {
-      return addr.regex.MatchString(s.patternSpace)
+      return addr.regex.Match(s.patternSpace)
     }
     return false;
   }
   return true;
 }
 
-func NewCmd(pieces []string) (Cmd, os.Error) {
+func NewCmd(pieces [][]byte) (Cmd, os.Error) {
   retryOnce := true;
 
   addr := checkForAddress(pieces[0]);
   if addr != nil {
     pieces = pieces[1:]
   }
-retry:
-  if retryOnce {
-    switch pieces[0] {
-    case "s":
-      return NewSCmd(pieces, addr)
-    case "q":
-      return NewQCmd(pieces, addr)
-    case "d":
-      return NewDCmd(pieces, addr)
-    case "P":
-      return NewPCmd(pieces, addr)
-    case "n":
-      return NewNCmd(pieces, addr)
-    }
-    if re, ok := regexp.Compile(pieces[0]); ok == nil {
-      pieces = pieces[1:];
-      addr = &address{-1, false, re};
-      retryOnce = false;
-      goto retry;
+  if len(pieces[0]) > 0 {
+  retry:
+    if retryOnce {
+      switch pieces[0][0] {
+      case 's':
+        return NewSCmd(pieces, addr)
+      case 'q':
+        return NewQCmd(pieces, addr)
+      case 'd':
+        return NewDCmd(pieces, addr)
+      case 'P':
+        return NewPCmd(pieces, addr)
+      case 'n':
+        return NewNCmd(pieces, addr)
+      }
+      if re, ok := regexp.Compile(string(pieces[0])); ok == nil {
+        pieces = pieces[1:];
+        addr = &address{-1, false, re};
+        retryOnce = false;
+        goto retry;
+      }
     }
   }
 

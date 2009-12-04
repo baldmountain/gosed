@@ -46,13 +46,13 @@ func (c *q_cmd) String() string {
   return fmt.Sprint("{Quit Cmd}");
 }
 
-func NewQCmd(pieces []string, addr *address) (c *q_cmd, err os.Error) {
+func NewQCmd(pieces [][]byte, addr *address) (c *q_cmd, err os.Error) {
   err = nil;
   switch len(pieces) {
   case 2:
     c = new(q_cmd);
     c.addr = addr;
-    c.exit_code, err = strconv.Atoi(pieces[1]);
+    c.exit_code, err = strconv.Atoi(string(pieces[1]));
     if err != nil {
       c = nil
     }

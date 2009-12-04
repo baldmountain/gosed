@@ -30,12 +30,13 @@ import (
   "fmt";
   "regexp";
   "strconv";
+  "bytes";
 )
 
 type s_cmd struct {
   command;
   regex   string;
-  replace string;
+  replace []byte;
   flag    string;
   count   int;
   re      *regexp.Regexp;
@@ -48,7 +49,7 @@ func (c *s_cmd) String() string {
   return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s flag:%s}", c.regex, c.replace, c.flag);
 }
 
-func NewSCmd(pieces []string, addr *address) (c *s_cmd, err os.Error) {
+func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
   if len(pieces) != 4 {
     return nil, os.ErrorString("invalid script line")
   }
@@ -57,18 +58,18 @@ func NewSCmd(pieces []string, addr *address) (c *s_cmd, err os.Error) {
   c = new(s_cmd);
   c.addr = addr;
 
-  c.regex = pieces[1];
+  c.regex = string(pieces[1]);
   if len(c.regex) == 0 {
     return nil, os.ErrorString("Regular expression in s command can't be zero length.")
   }
-  c.re, err = regexp.Compile(c.regex);
+  c.re, err = regexp.Compile(string(c.regex));
   if err != nil {
     return nil, err
   }
 
   c.replace = pieces[2];
 
-  c.flag = pieces[3];
+  c.flag = string(pieces[3]);
   if c.flag != "g" {
     c.count = 1;
     if len(c.flag) > 0 {
@@ -89,23 +90,24 @@ func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
 
   switch c.flag {
   case "g":
-    s.patternSpace = c.re.ReplaceAllString(s.patternSpace, c.replace)
+    s.patternSpace = c.re.ReplaceAll(s.patternSpace, c.replace)
   default:
     // a numeric flag command
     count := c.count;
     line := s.patternSpace;
-    s.patternSpace = "";
+    s.patternSpace = make([]byte, 0);
     for {
       if count <= 0 {
-        s.patternSpace += line;
+        s.patternSpace = bytes.Add(s.patternSpace, line);
         return;
       }
-      matches := c.re.ExecuteString(line);
+      matches := c.re.Execute(line);
       if len(matches) == 0 {
-        s.patternSpace += line;
+        s.patternSpace = bytes.Add(s.patternSpace, line);
         return;
       }
-      s.patternSpace += line[0:matches[0]] + c.replace;
+      s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]]);
+      s.patternSpace = bytes.Add(s.patternSpace, c.replace);
       line = line[matches[1]:];
       count--;
     }
