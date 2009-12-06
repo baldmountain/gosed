@@ -26,34 +26,42 @@
 package sed
 
 import (
-  "os";
-  "fmt";
+	"os";
+	"fmt";
+	"bytes"
 )
 
 type p_cmd struct {
-  command;
+	command;
+	upToNewLine bool;
 }
 
 func (c *p_cmd) String() string {
-  if c != nil && c.addr != nil {
-    return fmt.Sprintf("{Output pattern space Cmd addr:%v}", c.addr)
-  }
-  return fmt.Sprint("{Output pattern space Cmd}");
+	if c != nil && c.addr != nil {
+		return fmt.Sprintf("{Output pattern space Cmd addr:%v}", c.addr)
+	}
+	return fmt.Sprint("{Output pattern space Cmd}");
 }
 
 func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
-  // print output space
-  fmt.Fprintln(s.outputFile, string(s.patternSpace));
-  return false, nil;
+	// print output space
+	if c.upToNewLine {
+	  firstLine := bytes.Split(s.patternSpace, []byte{'\n'}, 1)[0];
+  	fmt.Fprintln(s.outputFile, string(firstLine));
+	} else {
+  	fmt.Fprintln(s.outputFile, string(s.patternSpace));
+	}
+	return false, nil;
 }
 
-func (c *p_cmd) getAddress() *address { return c.addr }
+func (c *p_cmd) getAddress() *address	{ return c.addr }
 
 func NewPCmd(pieces [][]byte, addr *address) (*p_cmd, os.Error) {
-  if len(pieces) > 1 {
-    return nil, os.ErrorString("Too many parameters to P command")
-  }
-  cmd := new(p_cmd);
-  cmd.addr = addr;
-  return cmd, nil;
+	if len(pieces) > 1 {
+		return nil, WrongNumberOfCommandParameters
+	}
+	cmd := new(p_cmd);
+	cmd.addr = addr;
+	cmd.upToNewLine = pieces[0][0] == 'P';
+	return cmd, nil;
 }

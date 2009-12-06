@@ -26,49 +26,49 @@
 package sed
 
 import (
-  "os";
-  "fmt";
-  "strconv";
+	"os";
+	"fmt";
+	"strconv";
 )
 
 type q_cmd struct {
-  command;
-  exit_code int;
+	command;
+	exit_code	int;
 }
 
 func (c *q_cmd) String() string {
-  if c != nil {
-    if c.addr != nil {
-      return fmt.Sprintf("{Quit Cmd with exit code: %d addr:%v}", c.exit_code, c.addr)
-    }
-    return fmt.Sprintf("{Quit Cmd with exit code: %d}", c.exit_code);
-  }
-  return fmt.Sprint("{Quit Cmd}");
+	if c != nil {
+		if c.addr != nil {
+			return fmt.Sprintf("{Quit Cmd with exit code: %d addr:%v}", c.exit_code, c.addr)
+		}
+		return fmt.Sprintf("{Quit Cmd with exit code: %d}", c.exit_code);
+	}
+	return fmt.Sprint("{Quit Cmd}");
 }
 
 func NewQCmd(pieces [][]byte, addr *address) (c *q_cmd, err os.Error) {
-  err = nil;
-  switch len(pieces) {
-  case 2:
-    c = new(q_cmd);
-    c.addr = addr;
-    c.exit_code, err = strconv.Atoi(string(pieces[1]));
-    if err != nil {
-      c = nil
-    }
-  case 1:
-    c = new(q_cmd);
-    c.addr = addr;
-    c.exit_code = 0;
-  default:
-    c, err = nil, os.ErrorString("Too many parameters to q command")
-  }
-  return c, err;
+	err = nil;
+	switch len(pieces) {
+	case 2:
+		c = new(q_cmd);
+		c.addr = addr;
+		c.exit_code, err = strconv.Atoi(string(pieces[1]));
+		if err != nil {
+			c = nil
+		}
+	case 1:
+		c = new(q_cmd);
+		c.addr = addr;
+		c.exit_code = 0;
+	default:
+		c, err = nil, WrongNumberOfCommandParameters
+	}
+	return c, err;
 }
 
-func (c *q_cmd) getAddress() *address { return c.addr }
+func (c *q_cmd) getAddress() *address	{ return c.addr }
 
 func (c *q_cmd) processLine(s *Sed) (stop bool, err os.Error) {
-  os.Exit(c.exit_code);
-  return false, nil;
+	os.Exit(c.exit_code);
+	return false, nil;
 }

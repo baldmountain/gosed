@@ -26,32 +26,32 @@
 package sed
 
 import (
-  "os";
-  "fmt";
+	"os";
+	"fmt";
 )
 
 type d_cmd struct {
-  command;
+	command;
 }
 
 func (c *d_cmd) String() string {
-  if c != nil && c.addr != nil {
-    return fmt.Sprintf("{Delete Cmd addr:%v}", c.addr)
-  }
-  return fmt.Sprintf("{Delete Cmd}");
+	if c != nil && c.addr != nil {
+		return fmt.Sprintf("{Delete Cmd addr:%v}", c.addr)
+	}
+	return fmt.Sprintf("{Delete Cmd}");
 }
 
 func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {
-  return true, nil
+	return true, nil
 }
 
-func (c *d_cmd) getAddress() *address { return c.addr }
+func (c *d_cmd) getAddress() *address	{ return c.addr }
 
 func NewDCmd(pieces [][]byte, addr *address) (*d_cmd, os.Error) {
-  if len(pieces) > 1 {
-    return nil, os.ErrorString("Too many parameters to d command")
-  }
-  cmd := new(d_cmd);
-  cmd.addr = addr;
-  return cmd, nil;
+	if len(pieces) > 1 {
+		return nil, WrongNumberOfCommandParameters
+	}
+	cmd := new(d_cmd);
+	cmd.addr = addr;
+	return cmd, nil;
 }

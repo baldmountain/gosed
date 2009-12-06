@@ -46,26 +46,26 @@ GOTESTFILES=\
 	sed_test.go
 
 # build "main" executable
-sed: package
+gosed: package
 	$(GC) -I_obj main.go
 	$(LD) -L_obj -o $@ main.$O
 	@echo "Done. Executable is: $@"
 
 clean:
-	rm -rf *.[$(OS)o] *.a [$(OS)].out _obj _test _testmain.go sed
+	rm -rf *.[$(OS)o] *.a [$(OS)].out _obj _test _testmain.go sed gosed
 
 package: _obj/$(TARG).a
 
 fmt:
-	gofmt -w -tabwidth=2 -spaces=true main.go
-	gofmt -w -tabwidth=2 -spaces=true sed.go
-	gofmt -w -tabwidth=2 -spaces=true cmd.go
-	gofmt -w -tabwidth=2 -spaces=true d_cmd.go
-	gofmt -w -tabwidth=2 -spaces=true n_cmd.go
-	gofmt -w -tabwidth=2 -spaces=true p_cmd.go
-	gofmt -w -tabwidth=2 -spaces=true q_cmd.go
-	gofmt -w -tabwidth=2 -spaces=true s_cmd.go
-	gofmt -w -tabwidth=2 -spaces=true sed_test.go
+	gofmt -w main.go
+	gofmt -w sed.go
+	gofmt -w cmd.go
+	gofmt -w d_cmd.go
+	gofmt -w n_cmd.go
+	gofmt -w p_cmd.go
+	gofmt -w q_cmd.go
+	gofmt -w s_cmd.go
+	gofmt -w sed_test.go
 
 
 # create a Go package file (.a)

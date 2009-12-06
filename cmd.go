@@ -26,90 +26,97 @@
 package sed
 
 import (
-  "os";
-  "strconv";
-  "regexp";
-  "fmt";
+	"os";
+	"strconv";
+	"regexp";
+	"fmt";
+)
+
+var (
+  WrongNumberOfCommandParameters os.Error = os.ErrorString("Wrong number of parameters for command");
+  UnknownScriptCommand os.Error = os.ErrorString("Unknown script command");
+  InvalidSCommandFlag os.Error = os.ErrorString("Invalid flag for s command");
+  RegularExpressionExpected os.Error = os.ErrorString("Expected a regular expression, got zero length string")
 )
 
 type Cmd interface {
-  fmt.Stringer;
-  getAddress() *address;
-  processLine(s *Sed) (stop bool, err os.Error);
+	fmt.Stringer;
+	getAddress() *address;
+	processLine(s *Sed) (stop bool, err os.Error);
 }
 
 type address struct {
-  lineNumber int;
-  lastLine   bool;
-  regex      *regexp.Regexp;
+	lineNumber	int;
+	lastLine	bool;
+	regex		*regexp.Regexp;
 }
 
 func (a *address) String() string {
-  return fmt.Sprintf("address{lineNumber:%d lastLine:%t regex:%v}", a.lineNumber, a.lastLine, a.regex)
+	return fmt.Sprintf("address{lineNumber:%d lastLine:%t regex:%v}", a.lineNumber, a.lastLine, a.regex)
 }
 
 
 type command struct {
-  addr *address;
+	addr *address;
 }
 
 // A nil address means match any line
 func checkForAddress(s []byte) *address {
-  if len(s) > 0 && s[0] == '$' {
-    return &address{-1, true, nil}
-  }
-  if ln, ok := strconv.Atoi(string(s)); ok == nil {
-    return &address{ln, false, nil}
-  }
-  return nil;
+	if len(s) > 0 && s[0] == '$' {
+		return &address{-1, true, nil}
+	}
+	if ln, ok := strconv.Atoi(string(s)); ok == nil {
+		return &address{ln, false, nil}
+	}
+	return nil;
 }
 
 func (s *Sed) lineMatchesAddress(addr *address) bool {
-  if addr != nil {
-    if s.lineNumber == addr.lineNumber {
-      return true
-    }
-    if addr.lastLine && s.lineNumber == len(s.inputLines) {
-      return true
-    }
-    if addr.regex != nil {
-      return addr.regex.Match(s.patternSpace)
-    }
-    return false;
-  }
-  return true;
+	if addr != nil {
+		if s.lineNumber == addr.lineNumber {
+			return true
+		}
+		if addr.lastLine && s.lineNumber == len(s.inputLines) {
+			return true
+		}
+		if addr.regex != nil {
+			return addr.regex.Match(s.patternSpace)
+		}
+		return false;
+	}
+	return true;
 }
 
 func NewCmd(pieces [][]byte) (Cmd, os.Error) {
-  retryOnce := true;
+	retryOnce := true;
 
-  addr := checkForAddress(pieces[0]);
-  if addr != nil {
-    pieces = pieces[1:]
-  }
-  if len(pieces[0]) > 0 {
-  retry:
-    if retryOnce {
-      switch pieces[0][0] {
-      case 's':
-        return NewSCmd(pieces, addr)
-      case 'q':
-        return NewQCmd(pieces, addr)
-      case 'd':
-        return NewDCmd(pieces, addr)
-      case 'P':
-        return NewPCmd(pieces, addr)
-      case 'n':
-        return NewNCmd(pieces, addr)
-      }
-      if re, ok := regexp.Compile(string(pieces[0])); ok == nil {
-        pieces = pieces[1:];
-        addr = &address{-1, false, re};
-        retryOnce = false;
-        goto retry;
-      }
-    }
-  }
+	addr := checkForAddress(pieces[0]);
+	if addr != nil {
+		pieces = pieces[1:]
+	}
+	if len(pieces[0]) > 0 {
+	retry:
+		if retryOnce {
+			switch pieces[0][0] {
+			case 's':
+				return NewSCmd(pieces, addr)
+			case 'q':
+				return NewQCmd(pieces, addr)
+			case 'd':
+				return NewDCmd(pieces, addr)
+			case 'P', 'p':
+				return NewPCmd(pieces, addr)
+			case 'n':
+				return NewNCmd(pieces, addr)
+			}
+			if re, ok := regexp.Compile(string(pieces[0])); ok == nil {
+				pieces = pieces[1:];
+				addr = &address{-1, false, re};
+				retryOnce = false;
+				goto retry;
+			}
+		}
+	}
 
-  return nil, os.ErrorString("unknown script command");
+	return nil, UnknownScriptCommand;
 }

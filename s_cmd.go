@@ -26,99 +26,99 @@
 package sed
 
 import (
-  "os";
-  "fmt";
-  "regexp";
-  "strconv";
-  "bytes";
+	"os";
+	"fmt";
+	"regexp";
+	"strconv";
+	"bytes";
 )
 
 const (
-  global_replace = -1;
+	global_replace = -1;
 )
 
 type s_cmd struct {
-  command;
-  regex   string;
-  replace []byte;
-  count   int;
-  re      *regexp.Regexp;
+	command;
+	regex	string;
+	replace	[]byte;
+	count	int;
+	re	*regexp.Regexp;
 }
 
 func (c *s_cmd) String() string {
-  if c != nil {
-    if c.addr != nil {
-      return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d addr:%v}", c.regex, c.replace, c.count, c.addr)
-    }
-    return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d}", c.regex, c.replace, c.count);
-  }
-  return "{Substitue Cmd}";
+	if c != nil {
+		if c.addr != nil {
+			return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d addr:%v}", c.regex, c.replace, c.count, c.addr)
+		}
+		return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d}", c.regex, c.replace, c.count);
+	}
+	return "{Substitue Cmd}";
 }
 
 func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
-  if len(pieces) != 4 {
-    return nil, os.ErrorString("invalid script line")
-  }
+	if len(pieces) != 4 {
+		return nil, WrongNumberOfCommandParameters
+	}
 
-  err = nil;
-  c = new(s_cmd);
-  c.addr = addr;
+	err = nil;
+	c = new(s_cmd);
+	c.addr = addr;
 
-  c.regex = string(pieces[1]);
-  if len(c.regex) == 0 {
-    return nil, os.ErrorString("Regular expression in s command can't be zero length.")
-  }
-  c.re, err = regexp.Compile(string(c.regex));
-  if err != nil {
-    return nil, err
-  }
+	c.regex = string(pieces[1]);
+	if len(c.regex) == 0 {
+		return nil, RegularExpressionExpected
+	}
+	c.re, err = regexp.Compile(string(c.regex));
+	if err != nil {
+		return nil, err
+	}
 
-  c.replace = pieces[2];
+	c.replace = pieces[2];
 
-  flag := string(pieces[3]);
-  if flag != "g" {
-    c.count = 1;
-    if len(flag) > 0 {
-      c.count, err = strconv.Atoi(flag);
-      if err != nil {
-        return nil, os.ErrorString("Invalid flag for s command " + err.String())
-      }
-    }
-  } else {
-    c.count = global_replace
-  }
+	flag := string(pieces[3]);
+	if flag != "g" {
+		c.count = 1;
+		if len(flag) > 0 {
+			c.count, err = strconv.Atoi(flag);
+			if err != nil {
+				return nil, InvalidSCommandFlag
+			}
+		}
+	} else {
+		c.count = global_replace
+	}
 
-  return c, err;
+	return c, err;
 }
 
-func (c *s_cmd) getAddress() *address { return c.addr }
+func (c *s_cmd) getAddress() *address	{ return c.addr }
 
 func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
-  stop, err = false, nil;
+	stop, err = false, nil;
 
-  switch c.count {
-  case global_replace:
-    s.patternSpace = c.re.ReplaceAll(s.patternSpace, c.replace)
-  default:
-    // a numeric flag command
-    count := c.count;
-    line := s.patternSpace;
-    s.patternSpace = make([]byte, 0);
-    for {
-      if count <= 0 {
-        s.patternSpace = bytes.Add(s.patternSpace, line);
-        return;
-      }
-      matches := c.re.Execute(line);
-      if len(matches) == 0 {
-        s.patternSpace = bytes.Add(s.patternSpace, line);
-        return;
-      }
-      s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]]);
-      s.patternSpace = bytes.Add(s.patternSpace, c.replace);
-      line = line[matches[1]:];
-      count--;
-    }
-  }
-  return stop, err;
+	switch c.count {
+	case global_replace:
+		s.patternSpace = c.re.ReplaceAll(s.patternSpace, c.replace)
+	default:
+		// a numeric flag command
+		count := c.count;
+		line := s.patternSpace;
+		s.patternSpace = make([]byte, 0);
+		for {
+			if count <= 0 {
+				s.patternSpace = bytes.Add(s.patternSpace, line);
+				return;
+			}
+			matches := c.re.Execute(line);
+			if len(matches) == 0 {
+				s.patternSpace = bytes.Add(s.patternSpace, line);
+				return;
+			}
+			s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]]);
+			s.patternSpace = bytes.Add(s.patternSpace, c.replace);
+			line = line[matches[1]:];
+			count--;
+		}
+	}
+	return stop, err;
 }
