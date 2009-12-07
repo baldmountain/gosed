@@ -44,7 +44,7 @@ func TestNewCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected unknown script command", "unknown script command", err.String())
+		checkString(t, "Expected Unknown script command", "Unknown script command", err.String())
 	}
 
 	pieces = [][]byte{[]byte{'4', 'r', '5'}, []byte{'o'}, []byte{'0'}, []byte{'g'}};
@@ -55,7 +55,7 @@ func TestNewCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected unknown script command", "unknown script command", err.String())
+		checkString(t, "Expected Unknown script command", "Unknown script command", err.String())
 	}
 
 	// s
@@ -84,7 +84,7 @@ func TestNewDCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Too many parameters to d command", "Too many parameters to d command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
 	}
 
 	pieces = [][]byte{[]byte{'d'}, []byte{'d'}};
@@ -96,7 +96,7 @@ func TestNewDCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Too many parameters to d command", "Too many parameters to d command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
 	}
 
 	pieces = [][]byte{[]byte{'d'}};
@@ -153,7 +153,7 @@ func TestNewNCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Too many parameters to d command", "Too many parameters to n command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
 	}
 
 	pieces = [][]byte{[]byte{'n'}, []byte{'d'}};
@@ -165,7 +165,7 @@ func TestNewNCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Too many parameters to d command", "Too many parameters to n command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
 	}
 
 	pieces = [][]byte{[]byte{'n'}};
@@ -222,7 +222,7 @@ func TestNewPCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Too many parameters to p command", "Too many parameters to P command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
 	}
 
 	pieces = [][]byte{[]byte{'P'}, []byte{'d'}};
@@ -234,7 +234,7 @@ func TestNewPCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Too many parameters to p command", "Too many parameters to P command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
 	}
 
 	pieces = [][]byte{[]byte{'P'}};
@@ -288,7 +288,7 @@ func TestNewQCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Too many parameters to q command", "Too many parameters to q command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
 	}
 
 	pieces = [][]byte{[]byte{'q'}, []byte{'q'}};
