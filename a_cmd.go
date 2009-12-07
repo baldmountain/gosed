@@ -34,7 +34,7 @@ import (
 
 type a_cmd struct {
 	command;
-	text []byte;
+	text	[]byte;
 }
 
 func (c *a_cmd) String() string {
@@ -42,14 +42,14 @@ func (c *a_cmd) String() string {
 		if c.addr != nil {
 			return fmt.Sprintf("{Append Cmd addr:%v text:%s}", c.addr, c.text)
 		}
-			return fmt.Sprintf("{Append Cmd text:%s}", c.text)
+		return fmt.Sprintf("{Append Cmd text:%s}", c.text);
 	}
 	return fmt.Sprintf("{Append Cmd}");
 }
 
 func (c *a_cmd) processLine(s *Sed) (bool, os.Error) {
 	s.patternSpace = bytes.Add(s.patternSpace, c.text);
-	return true, nil
+	return true, nil;
 }
 
 func (c *a_cmd) getAddress() *address	{ return c.addr }

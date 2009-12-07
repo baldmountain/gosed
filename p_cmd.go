@@ -28,12 +28,12 @@ package sed
 import (
 	"os";
 	"fmt";
-	"bytes"
+	"bytes";
 )
 
 type p_cmd struct {
 	command;
-	upToNewLine bool;
+	upToNewLine	bool;
 }
 
 func (c *p_cmd) String() string {
@@ -46,10 +46,10 @@ func (c *p_cmd) String() string {
 func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
 	// print output space
 	if c.upToNewLine {
-	  firstLine := bytes.Split(s.patternSpace, []byte{'\n'}, 1)[0];
-  	fmt.Fprintln(s.outputFile, string(firstLine));
+		firstLine := bytes.Split(s.patternSpace, []byte{'\n'}, 1)[0];
+		fmt.Fprintln(s.outputFile, string(firstLine));
 	} else {
-  	fmt.Fprintln(s.outputFile, string(s.patternSpace));
+		fmt.Fprintln(s.outputFile, string(s.patternSpace))
 	}
 	return false, nil;
 }

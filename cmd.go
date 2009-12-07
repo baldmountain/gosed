@@ -33,10 +33,10 @@ import (
 )
 
 var (
-  WrongNumberOfCommandParameters os.Error = os.ErrorString("Wrong number of parameters for command");
-  UnknownScriptCommand os.Error = os.ErrorString("Unknown script command");
-  InvalidSCommandFlag os.Error = os.ErrorString("Invalid flag for s command");
-  RegularExpressionExpected os.Error = os.ErrorString("Expected a regular expression, got zero length string")
+	WrongNumberOfCommandParameters	os.Error	= os.ErrorString("Wrong number of parameters for command");
+	UnknownScriptCommand		os.Error	= os.ErrorString("Unknown script command");
+	InvalidSCommandFlag		os.Error	= os.ErrorString("Invalid flag for s command");
+	RegularExpressionExpected	os.Error	= os.ErrorString("Expected a regular expression, got zero length string");
 )
 
 type Cmd interface {
