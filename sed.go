@@ -72,6 +72,7 @@ func (s *Sed) Init() {
 	s.outputFile = os.Stdout;
 	s.patternSpace = make([]byte, 0);
 	s.holdSpace = make([]byte, 0);
+	s.lineNumber = 0;
 }
 
 func usage() {
@@ -131,13 +132,22 @@ func (s *Sed) printPatternSpace() {
 	}
 }
 
+func (s *Sed)getNextLine()([]byte, os.Error) {
+	if s.lineNumber < len(s.inputLines) {
+		val := s.inputLines[s.lineNumber];
+		s.lineNumber++;
+		return val, nil;
+	}
+	return nil, os.EOF;
+}
+
 func (s *Sed) process() {
 	if *treat_files_as_seperate || *edit_inplace {
 		s.lineNumber = 0
 	}
-	for _, s.patternSpace = range s.inputLines {
+	var err os.Error;
+	for s.patternSpace, err = s.getNextLine(); err == nil; s.patternSpace, err = s.getNextLine() {
 		// track line number starting with line 1
-		s.lineNumber++;
 		for c := range s.commands.Iter() {
 			// println("cmd: ", c.(fmt.Stringer).String());
 			if s.lineMatchesAddress(c.(Cmd).getAddress()) {
