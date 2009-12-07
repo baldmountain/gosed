@@ -35,6 +35,7 @@ TARG=sed
 GOFILES=\
 	sed.go \
 	cmd.go \
+	a_cmd.go \
 	d_cmd.go \
 	eql_cmd.go \
 	n_cmd.go \
@@ -68,6 +69,7 @@ fmt:
 	gofmt -w s_cmd.go
 	gofmt -w sed_test.go
 	gofmt -w eql_cmd.go
+	gofmt -w a_cmd.go
 
 
 # create a Go package file (.a)

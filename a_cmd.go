@@ -1,0 +1,66 @@
+//
+//  cmd.go
+//  sed
+//
+// Copyright (c) 2009 Geoffrey Clements
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+
+package sed
+
+import (
+	"os";
+	"fmt";
+	"bytes";
+	"regexp";
+)
+
+type a_cmd struct {
+	command;
+	text []byte;
+}
+
+func (c *a_cmd) String() string {
+	if c != nil {
+		if c.addr != nil {
+			return fmt.Sprintf("{Append Cmd addr:%v text:%s}", c.addr, c.text)
+		}
+			return fmt.Sprintf("{Append Cmd text:%s}", c.text)
+	}
+	return fmt.Sprintf("{Append Cmd}");
+}
+
+func (c *a_cmd) processLine(s *Sed) (bool, os.Error) {
+	s.patternSpace = bytes.Add(s.patternSpace, c.text);
+	return true, nil
+}
+
+func (c *a_cmd) getAddress() *address	{ return c.addr }
+
+func NewACmd(pieces [][]byte, addr *address) (*a_cmd, os.Error) {
+	if len(pieces) != 2 {
+		return nil, WrongNumberOfCommandParameters
+	}
+	cmd := new(a_cmd);
+	cmd.addr = addr;
+	re, _ := regexp.Compile("[\\\\]n");
+	cmd.text = re.ReplaceAll(pieces[1], []byte{'\n'});
+	return cmd, nil;
+}

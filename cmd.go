@@ -110,6 +110,8 @@ func NewCmd(pieces [][]byte) (Cmd, os.Error) {
 				return NewNCmd(pieces, addr)
 			case '=':
 				return NewEqlCmd(pieces, addr)
+			case 'a':
+				return NewACmd(pieces, addr)
 			}
 			if re, ok := regexp.Compile(string(pieces[0])); ok == nil {
 				pieces = pieces[1:];
