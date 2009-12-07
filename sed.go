@@ -61,10 +61,12 @@ var usageShown bool = false
 
 type Sed struct {
 	inputLines		[][]byte;
+	lineNumber		int;
 	commands		*vector.Vector;
 	outputFile		*os.File;
 	patternSpace, holdSpace	[]byte;
-	lineNumber		int;
+	scriptLines		[][]byte;
+	scriptLineNumber		int;
 }
 
 func (s *Sed) Init() {
@@ -72,7 +74,6 @@ func (s *Sed) Init() {
 	s.outputFile = os.Stdout;
 	s.patternSpace = make([]byte, 0);
 	s.holdSpace = make([]byte, 0);
-	s.lineNumber = 0;
 }
 
 func usage() {
@@ -95,10 +96,22 @@ func (s *Sed) readInputFile() {
 	s.inputLines = bytes.Split(b, []byte{'\n'}, 0);
 }
 
+func (s *Sed)getNextScriptLine()([]byte, os.Error) {
+	if s.scriptLineNumber < len(s.scriptLines) {
+		val := s.scriptLines[s.scriptLineNumber];
+		s.scriptLineNumber++;
+		return val, nil;
+	}
+	return nil, os.EOF;
+}
+
 func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 	// a script may be a single command or it may be several
-	scriptLines := bytes.Split(scriptBuffer, []byte{'\n'}, 0);
-	for idx, line := range scriptLines {
+	s.scriptLines = bytes.Split(scriptBuffer, []byte{'\n'}, 0);
+	s.scriptLineNumber = 0;
+	var line []byte;
+	var serr os.Error;
+	for line,serr = s.getNextScriptLine(); serr == nil; line,serr = s.getNextScriptLine() {
 		line = bytes.TrimSpace(line);
 		if bytes.HasPrefix(line, []byte{'#'}) || len(line) == 0 {
 			// comment
@@ -106,9 +119,9 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 		}
 		// this isn't really right. There may be slashes in the regular expression
 		pieces := bytes.Split(line, []byte{'/'}, 0);
-		c, err := NewCmd(pieces);
+		c, err := NewCmd(s, pieces);
 		if err != nil {
-			fmt.Printf("Script error: %s -> %d: %s\n", err.String(), idx+1, line);
+			fmt.Printf("Script error: %s -> %d: %s\n", err.String(), s.scriptLineNumber, line);
 			os.Exit(-1);
 		}
 		s.commands.Push(c);
@@ -132,22 +145,13 @@ func (s *Sed) printPatternSpace() {
 	}
 }
 
-func (s *Sed)getNextLine()([]byte, os.Error) {
-	if s.lineNumber < len(s.inputLines) {
-		val := s.inputLines[s.lineNumber];
-		s.lineNumber++;
-		return val, nil;
-	}
-	return nil, os.EOF;
-}
-
 func (s *Sed) process() {
 	if *treat_files_as_seperate || *edit_inplace {
 		s.lineNumber = 0
 	}
-	var err os.Error;
-	for s.patternSpace, err = s.getNextLine(); err == nil; s.patternSpace, err = s.getNextLine() {
+	for _, s.patternSpace = range s.inputLines {
 		// track line number starting with line 1
+		s.lineNumber++;
 		for c := range s.commands.Iter() {
 			// println("cmd: ", c.(fmt.Stringer).String());
 			if s.lineMatchesAddress(c.(Cmd).getAddress()) {

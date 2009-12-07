@@ -5,7 +5,9 @@ s/more/MORE/1
 s/[oO]/0/2
 # n
 # d
-3/a/ Append text
+3/a/ Append text\
+with another line\
+and one more.
 =
 s/[Ll]ine/form/g
 5/p

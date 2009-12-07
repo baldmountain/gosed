@@ -29,7 +29,6 @@ import (
 	"os";
 	"fmt";
 	"bytes";
-	"regexp";
 )
 
 type a_cmd struct {
@@ -54,13 +53,21 @@ func (c *a_cmd) processLine(s *Sed) (bool, os.Error) {
 
 func (c *a_cmd) getAddress() *address	{ return c.addr }
 
-func NewACmd(pieces [][]byte, addr *address) (*a_cmd, os.Error) {
+func NewACmd(s *Sed, pieces [][]byte, addr *address) (*a_cmd, os.Error) {
 	if len(pieces) != 2 {
 		return nil, WrongNumberOfCommandParameters
 	}
 	cmd := new(a_cmd);
 	cmd.addr = addr;
-	re, _ := regexp.Compile("[\\\\]n");
-	cmd.text = re.ReplaceAll(pieces[1], []byte{'\n'});
+	cmd.text = pieces[1];
+	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
+		cmd.text = cmd.text[0:len(cmd.text)-1];
+		line, err := s.getNextScriptLine();
+		if err != nil {
+			break;
+		}
+		cmd.text = bytes.AddByte(cmd.text, '\n');
+		cmd.text = bytes.Add(cmd.text, line);
+	}
 	return cmd, nil;
 }

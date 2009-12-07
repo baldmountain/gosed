@@ -87,7 +87,7 @@ func (s *Sed) lineMatchesAddress(addr *address) bool {
 	return true;
 }
 
-func NewCmd(pieces [][]byte) (Cmd, os.Error) {
+func NewCmd(s *Sed, pieces [][]byte) (Cmd, os.Error) {
 	retryOnce := true;
 
 	addr := checkForAddress(pieces[0]);
@@ -111,7 +111,7 @@ func NewCmd(pieces [][]byte) (Cmd, os.Error) {
 			case '=':
 				return NewEqlCmd(pieces, addr)
 			case 'a':
-				return NewACmd(pieces, addr)
+				return NewACmd(s, pieces, addr)
 			}
 			if re, ok := regexp.Compile(string(pieces[0])); ok == nil {
 				pieces = pieces[1:];
