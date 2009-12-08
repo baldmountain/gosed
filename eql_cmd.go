@@ -26,9 +26,11 @@
 package sed
 
 import (
-	"os";
+	"bytes";
 	"fmt";
+	"os";
 	"strconv";
+	"strings";
 )
 
 type eql_cmd struct {
@@ -43,7 +45,12 @@ func (c *eql_cmd) String() string {
 }
 
 func (c *eql_cmd) processLine(s *Sed) (bool, os.Error) {
-	fmt.Fprint(s.outputFile, strconv.Itoa(s.lineNumber));
+	ln := strings.Bytes(strconv.Itoa(s.lineNumber));
+	b := bytes.NewBuffer(nil);
+	b.Write(ln);
+	b.Write(s.patternSpace);
+	s.patternSpace = b.Bytes();
+	return false, nil;
 	return false, nil;
 }
 

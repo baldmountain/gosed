@@ -38,6 +38,7 @@ GOFILES=\
 	a_cmd.go \
 	d_cmd.go \
 	eql_cmd.go \
+	i_cmd.go \
 	n_cmd.go \
 	p_cmd.go \
 	q_cmd.go \
@@ -70,6 +71,7 @@ fmt:
 	gofmt -w sed_test.go
 	gofmt -w eql_cmd.go
 	gofmt -w a_cmd.go
+	gofmt -w i_cmd.go
 
 
 # create a Go package file (.a)

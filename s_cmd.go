@@ -26,11 +26,11 @@
 package sed
 
 import (
-	"os";
+	"bytes";
 	"fmt";
+	"os";
 	"regexp";
 	"strconv";
-	"bytes";
 )
 
 const (

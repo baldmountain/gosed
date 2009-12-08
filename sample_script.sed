@@ -1,4 +1,5 @@
 4/P
+5/p
 s/foo/bar/g
 s/t//g
 s/more/MORE/1
@@ -8,8 +9,13 @@ s/[oO]/0/2
 3/a/ Append text\
 with another line\
 and one more.
-=
 s/[Ll]ine/form/g
-5/p
-#s/t//g
-$/q/-1
+s/s/5/g
+#$/q/-1
+ 
+6/i/Insert text\
+with another line\
+and one more. 
+
+i/: 
+=

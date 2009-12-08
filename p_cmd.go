@@ -26,9 +26,9 @@
 package sed
 
 import (
-	"os";
-	"fmt";
 	"bytes";
+	"fmt";
+	"os";
 )
 
 type p_cmd struct {

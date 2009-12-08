@@ -26,9 +26,9 @@
 package sed
 
 import (
-	"os";
-	"fmt";
 	"bytes";
+	"fmt";
+	"os";
 )
 
 type a_cmd struct {
@@ -48,7 +48,7 @@ func (c *a_cmd) String() string {
 
 func (c *a_cmd) processLine(s *Sed) (bool, os.Error) {
 	s.patternSpace = bytes.Add(s.patternSpace, c.text);
-	return true, nil;
+	return false, nil;
 }
 
 func (c *a_cmd) getAddress() *address	{ return c.addr }
@@ -61,10 +61,10 @@ func NewACmd(s *Sed, pieces [][]byte, addr *address) (*a_cmd, os.Error) {
 	cmd.addr = addr;
 	cmd.text = pieces[1];
 	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
-		cmd.text = cmd.text[0:len(cmd.text)-1];
+		cmd.text = cmd.text[0 : len(cmd.text)-1];
 		line, err := s.getNextScriptLine();
 		if err != nil {
-			break;
+			break
 		}
 		cmd.text = bytes.AddByte(cmd.text, '\n');
 		cmd.text = bytes.Add(cmd.text, line);

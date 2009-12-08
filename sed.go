@@ -26,13 +26,15 @@
 package sed
 
 import (
+	"bytes";
+	"container/vector";
 	"flag";
 	"fmt";
 	"io/ioutil";
 	"os";
 	"strings";
-	"bytes";
-	"container/vector";
+	"unicode";
+	"utf8";
 )
 
 const (
@@ -59,6 +61,8 @@ var treat_files_as_seperate = flag.Bool("s", false, "Treat files as searate enti
 
 var usageShown bool = false
 
+var newLine = []byte{'\n'}
+
 type Sed struct {
 	inputLines		[][]byte;
 	lineNumber		int;
@@ -66,7 +70,7 @@ type Sed struct {
 	outputFile		*os.File;
 	patternSpace, holdSpace	[]byte;
 	scriptLines		[][]byte;
-	scriptLineNumber		int;
+	scriptLineNumber	int;
 }
 
 func (s *Sed) Init() {
@@ -93,10 +97,10 @@ func (s *Sed) readInputFile() {
 		fmt.Fprintf(os.Stderr, "Error reading input file %s\n", inputFilename);
 		os.Exit(-1);
 	}
-	s.inputLines = bytes.Split(b, []byte{'\n'}, 0);
+	s.inputLines = bytes.Split(b, newLine, 0);
 }
 
-func (s *Sed)getNextScriptLine()([]byte, os.Error) {
+func (s *Sed) getNextScriptLine() ([]byte, os.Error) {
 	if s.scriptLineNumber < len(s.scriptLines) {
 		val := s.scriptLines[s.scriptLineNumber];
 		s.scriptLineNumber++;
@@ -105,14 +109,31 @@ func (s *Sed)getNextScriptLine()([]byte, os.Error) {
 	return nil, os.EOF;
 }
 
+func trimSpaceFromBeginning(s []byte) []byte {
+	start, end := 0, len(s);
+	for start < end {
+		wid := 1;
+		rune := int(s[start]);
+		if rune >= utf8.RuneSelf {
+			rune, wid = utf8.DecodeRune(s[start:end])
+		}
+		if !unicode.IsSpace(rune) {
+			break
+		}
+		start += wid;
+	}
+	return s[start:end];
+}
+
 func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 	// a script may be a single command or it may be several
 	s.scriptLines = bytes.Split(scriptBuffer, []byte{'\n'}, 0);
 	s.scriptLineNumber = 0;
 	var line []byte;
 	var serr os.Error;
-	for line,serr = s.getNextScriptLine(); serr == nil; line,serr = s.getNextScriptLine() {
-		line = bytes.TrimSpace(line);
+	for line, serr = s.getNextScriptLine(); serr == nil; line, serr = s.getNextScriptLine() {
+		// line = bytes.TrimSpace(line);
+		line = trimSpaceFromBeginning(line);
 		if bytes.HasPrefix(line, []byte{'#'}) || len(line) == 0 {
 			// comment
 			continue
@@ -129,10 +150,10 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 	return nil;
 }
 
-func (s *Sed) printPatternSpace() {
-	l := len(s.patternSpace);
+func (s *Sed) printLine(line []byte) {
+	l := len(line);
 	if *line_wrap <= 0 || l < int(*line_wrap) {
-		fmt.Fprintf(s.outputFile, "%s\n", s.patternSpace)
+		fmt.Fprintf(s.outputFile, "%s\n", line)
 	} else {
 		// print the line in segments
 		for i := 0; i < l; i += int(*line_wrap) {
@@ -140,8 +161,15 @@ func (s *Sed) printPatternSpace() {
 			if endOfLine > l {
 				endOfLine = l
 			}
-			fmt.Fprintf(s.outputFile, "%s\n", s.patternSpace[i:endOfLine]);
+			fmt.Fprintf(s.outputFile, "%s\n", line[i:endOfLine]);
 		}
+	}
+}
+
+func (s *Sed) printPatternSpace() {
+	lines := bytes.Split(s.patternSpace, newLine, 0);
+	for _, line := range lines {
+		s.printLine(line)
 	}
 }
 
@@ -153,7 +181,6 @@ func (s *Sed) process() {
 		// track line number starting with line 1
 		s.lineNumber++;
 		for c := range s.commands.Iter() {
-			// println("cmd: ", c.(fmt.Stringer).String());
 			if s.lineMatchesAddress(c.(Cmd).getAddress()) {
 				stop, err := c.(Cmd).processLine(s);
 				if err != nil {

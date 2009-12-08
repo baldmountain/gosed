@@ -26,8 +26,8 @@
 package sed
 
 import (
-	"os";
 	"fmt";
+	"os";
 	"strconv";
 )
 

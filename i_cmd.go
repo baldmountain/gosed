@@ -26,32 +26,51 @@
 package sed
 
 import (
+	"bytes";
 	"fmt";
 	"os";
 )
 
-type d_cmd struct {
+type i_cmd struct {
 	command;
+	text	[]byte;
 }
 
-func (c *d_cmd) String() string {
-	if c != nil && c.addr != nil {
-		return fmt.Sprintf("{Delete Cmd addr:%v}", c.addr)
+func (c *i_cmd) String() string {
+	if c != nil {
+		if c.addr != nil {
+			return fmt.Sprintf("{Insert Cmd addr:%v text:%s}", c.addr, c.text)
+		}
+		return fmt.Sprintf("{Insert Cmd text:%s}", c.text);
 	}
-	return fmt.Sprintf("{Delete Cmd}");
+	return fmt.Sprintf("{Insert Cmd}");
 }
 
-func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {
-	return true, nil
+func (c *i_cmd) processLine(s *Sed) (bool, os.Error) {
+	b := bytes.NewBuffer(nil);
+	b.Write(c.text);
+	b.Write(s.patternSpace);
+	s.patternSpace = b.Bytes();
+	return false, nil;
 }
 
-func (c *d_cmd) getAddress() *address	{ return c.addr }
+func (c *i_cmd) getAddress() *address	{ return c.addr }
 
-func NewDCmd(pieces [][]byte, addr *address) (*d_cmd, os.Error) {
-	if len(pieces) > 1 {
+func NewICmd(s *Sed, pieces [][]byte, addr *address) (*i_cmd, os.Error) {
+	if len(pieces) != 2 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(d_cmd);
+	cmd := new(i_cmd);
 	cmd.addr = addr;
+	cmd.text = pieces[1];
+	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
+		cmd.text = cmd.text[0 : len(cmd.text)-1];
+		line, err := s.getNextScriptLine();
+		if err != nil {
+			break
+		}
+		cmd.text = bytes.AddByte(cmd.text, '\n');
+		cmd.text = bytes.Add(cmd.text, line);
+	}
 	return cmd, nil;
 }
