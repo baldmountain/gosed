@@ -138,9 +138,7 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 			// comment
 			continue
 		}
-		// this isn't really right. There may be slashes in the regular expression
-		pieces := bytes.Split(line, []byte{'/'}, 0);
-		c, err := NewCmd(s, pieces);
+		c, err := NewCmd(s, line);
 		if err != nil {
 			fmt.Printf("Script error: %s -> %d: %s\n", err.String(), s.scriptLineNumber, line);
 			os.Exit(-1);

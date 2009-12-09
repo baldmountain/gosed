@@ -26,10 +26,11 @@
 package sed
 
 import (
-	"os";
-	"strconv";
-	"regexp";
+	"bytes";
 	"fmt";
+	"os";
+	"regexp";
+	"strconv";
 )
 
 var (
@@ -46,34 +47,68 @@ type Cmd interface {
 }
 
 type address struct {
-	lineNumber	int;
+	rangeStart	int;
+	rangeEnd	int;
 	lastLine	bool;
 	regex		*regexp.Regexp;
 }
-
-func (a *address) String() string {
-	return fmt.Sprintf("address{lineNumber:%d lastLine:%t regex:%v}", a.lineNumber, a.lastLine, a.regex)
-}
-
 
 type command struct {
 	addr *address;
 }
 
+func (a *address) String() string {
+	return fmt.Sprintf("address{rangeStart:%d rangeEnd:%d lastLine:%t regex:%v}", a.rangeStart, a.rangeEnd, a.lastLine, a.regex)
+}
+
+func getNumberFromLine(s []byte)([]byte, int, os.Error) {
+		idx := 0;
+		for {
+			if s[idx] < '0' || s[idx] > '9' {
+				break
+			}
+			idx++;
+		}
+		i, err := strconv.Atoi(string(s[0:idx]));
+		if err != nil {
+			return s, -1, err;
+		}
+		return s[idx:], i, nil;
+}
+
 // A nil address means match any line
-func checkForAddress(s []byte) *address {
-	if len(s) > 0 && s[0] == '$' {
-		return &address{-1, true, nil}
+func checkForAddress(s []byte) ([]byte, *address, os.Error) {
+	if s[0] == '/' {
+		// regular expression address
+	} else if s[0] >= '0' && s[0] <= '9' {
+		// numeric line address
+		addr := new(address);
+		var err os.Error;
+		s, addr.rangeStart, err = getNumberFromLine(s);
+		if err != nil {
+			return s, nil, err
+		}
+		addr.rangeEnd = addr.rangeStart;
+		if s[0] == ',' {
+			s, addr.rangeEnd, err = getNumberFromLine(s[1:]);
+			if err != nil {
+				return s, nil, err
+			}
+		} else {
+			addr.rangeEnd = 0; // to end of file
+		}
+		return s, addr, nil;
 	}
-	if ln, ok := strconv.Atoi(string(s)); ok == nil {
-		return &address{ln, false, nil}
-	}
-	return nil;
+	return s, nil, nil;
 }
 
 func (s *Sed) lineMatchesAddress(addr *address) bool {
 	if addr != nil {
-		if s.lineNumber == addr.lineNumber {
+		if addr.rangeEnd == 0 {
+			if s.lineNumber >= addr.rangeStart {
+				return true;
+			}
+		} else if s.lineNumber >= addr.rangeStart && s.lineNumber <= addr.rangeEnd {
 			return true
 		}
 		if addr.lastLine && s.lineNumber == len(s.inputLines) {
@@ -87,40 +122,35 @@ func (s *Sed) lineMatchesAddress(addr *address) bool {
 	return true;
 }
 
-func NewCmd(s *Sed, pieces [][]byte) (Cmd, os.Error) {
-	retryOnce := true;
+func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
 
-	addr := checkForAddress(pieces[0]);
-	if addr != nil {
-		pieces = pieces[1:]
+	var err os.Error;
+	var addr *address;
+	line, addr, err = checkForAddress(line);
+	if err != nil {
+		return nil, err
 	}
+
+	pieces := bytes.Split(line, []byte{'/'}, 0);
+
 	if len(pieces[0]) > 0 {
-	retry:
-		if retryOnce {
-			switch pieces[0][0] {
-			case 's':
-				return NewSCmd(pieces, addr)
-			case 'q':
-				return NewQCmd(pieces, addr)
-			case 'd':
-				return NewDCmd(pieces, addr)
-			case 'P', 'p':
-				return NewPCmd(pieces, addr)
-			case 'n':
-				return NewNCmd(pieces, addr)
-			case '=':
-				return NewEqlCmd(pieces, addr)
-			case 'a':
-				return NewACmd(s, pieces, addr)
-			case 'i':
-				return NewICmd(s, pieces, addr)
-			}
-			if re, ok := regexp.Compile(string(pieces[0])); ok == nil {
-				pieces = pieces[1:];
-				addr = &address{-1, false, re};
-				retryOnce = false;
-				goto retry;
-			}
+		switch pieces[0][0] {
+		case 's':
+			return NewSCmd(pieces, addr)
+		case 'q':
+			return NewQCmd(pieces, addr)
+		case 'd':
+			return NewDCmd(pieces, addr)
+		case 'P', 'p':
+			return NewPCmd(pieces, addr)
+		case 'n':
+			return NewNCmd(pieces, addr)
+		case '=':
+			return NewEqlCmd(pieces, addr)
+		case 'a':
+			return NewACmd(s, pieces, addr)
+		case 'i':
+			return NewICmd(s, pieces, addr)
 		}
 	}
 
