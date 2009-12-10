@@ -38,6 +38,8 @@ GOFILES=\
 	a_cmd.go \
 	d_cmd.go \
 	eql_cmd.go \
+	g_cmd.go \
+	h_cmd.go \
 	i_cmd.go \
 	n_cmd.go \
 	p_cmd.go \
@@ -60,18 +62,7 @@ clean:
 package: _obj/$(TARG).a
 
 fmt:
-	gofmt -w main.go
-	gofmt -w sed.go
-	gofmt -w cmd.go
-	gofmt -w d_cmd.go
-	gofmt -w n_cmd.go
-	gofmt -w p_cmd.go
-	gofmt -w q_cmd.go
-	gofmt -w s_cmd.go
-	gofmt -w sed_test.go
-	gofmt -w eql_cmd.go
-	gofmt -w a_cmd.go
-	gofmt -w i_cmd.go
+	gofmt -w *.go
 
 
 # create a Go package file (.a)

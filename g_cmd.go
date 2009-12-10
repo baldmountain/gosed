@@ -1,5 +1,5 @@
 //
-//  eql_cmd.go
+//  g_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -29,38 +29,44 @@ import (
 	"bytes";
 	"fmt";
 	"os";
-	"strconv";
-	"strings";
 )
 
-type eql_cmd struct {
+type g_cmd struct {
 	command;
+	replace	bool;
 }
 
-func (c *eql_cmd) String() string {
+func (c *g_cmd) String() string {
 	if c != nil && c.addr != nil {
-		return fmt.Sprint("{Output current line number}", c.addr)
+		if c.replace {
+			return fmt.Sprint("{Replace pattern space with contents of hold space Cmd addr:%v}", c.addr)
+		} else {
+			return fmt.Sprint("{Append a newline and the hold space to the pattern space Cmd addr:%v}", c.addr)
+		}
 	}
-	return fmt.Sprint("{Output current line number Cmd}");
+	return fmt.Sprint("{Append/Replace pattern space with contents of hold space}");
 }
 
-func (c *eql_cmd) processLine(s *Sed) (bool, os.Error) {
-	ln := strings.Bytes(strconv.Itoa(s.lineNumber));
-	b := bytes.NewBuffer(nil);
-	b.Write(ln);
-	b.Write(s.patternSpace);
-	s.patternSpace = b.Bytes();
-	return false, nil;
+func (c *g_cmd) processLine(s *Sed) (bool, os.Error) {
+if c.replace {
+	s.patternSpace = copyByteSlice(s.holdSpace)
+} else {
+	s.patternSpace = bytes.AddByte(s.patternSpace, '\n');
+	s.patternSpace = bytes.Add(s.patternSpace, s.holdSpace);
+}
 	return false, nil;
 }
 
-func (c *eql_cmd) getAddress() *address	{ return c.addr }
+func (c *g_cmd) getAddress() *address	{ return c.addr }
 
-func NewEqlCmd(pieces [][]byte, addr *address) (*eql_cmd, os.Error) {
+func NewGCmd(pieces [][]byte, addr *address) (*g_cmd, os.Error) {
 	if len(pieces) > 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(eql_cmd);
+	cmd := new(g_cmd);
+	if pieces[0][0] == 'g' {
+		cmd.replace = true
+	}
 	cmd.addr = addr;
 	return cmd, nil;
 }

@@ -178,9 +178,11 @@ func (s *Sed) process() {
 	for _, s.patternSpace = range s.inputLines {
 		// track line number starting with line 1
 		s.lineNumber++;
+		stop := false;
 		for c := range s.commands.Iter() {
 			if s.lineMatchesAddress(c.(Cmd).getAddress()) {
-				stop, err := c.(Cmd).processLine(s);
+			  var err os.Error;
+				stop, err = c.(Cmd).processLine(s);
 				if err != nil {
 					fmt.Printf("%v\n", err);
 					os.Exit(-1);
@@ -190,7 +192,7 @@ func (s *Sed) process() {
 				}
 			}
 		}
-		if !*quiet {
+		if !*quiet  && !stop {
 			s.printPatternSpace()
 		}
 	}

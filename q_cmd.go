@@ -1,5 +1,5 @@
 //
-//  s_cmd.go
+//  q_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
