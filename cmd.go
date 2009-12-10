@@ -61,19 +61,19 @@ func (a *address) String() string {
 	return fmt.Sprintf("address{rangeStart:%d rangeEnd:%d lastLine:%t regex:%v}", a.rangeStart, a.rangeEnd, a.lastLine, a.regex)
 }
 
-func getNumberFromLine(s []byte)([]byte, int, os.Error) {
-		idx := 0;
-		for {
-			if s[idx] < '0' || s[idx] > '9' {
-				break
-			}
-			idx++;
+func getNumberFromLine(s []byte) ([]byte, int, os.Error) {
+	idx := 0;
+	for {
+		if s[idx] < '0' || s[idx] > '9' {
+			break
 		}
-		i, err := strconv.Atoi(string(s[0:idx]));
-		if err != nil {
-			return s, -1, err;
-		}
-		return s[idx:], i, nil;
+		idx++;
+	}
+	i, err := strconv.Atoi(string(s[0:idx]));
+	if err != nil {
+		return s, -1, err
+	}
+	return s[idx:], i, nil;
 }
 
 // A nil address means match any line
@@ -90,12 +90,15 @@ func checkForAddress(s []byte) ([]byte, *address, os.Error) {
 		}
 		addr.rangeEnd = addr.rangeStart;
 		if s[0] == ',' {
-			s, addr.rangeEnd, err = getNumberFromLine(s[1:]);
-			if err != nil {
-				return s, nil, err
+			s = s[1:];
+			if len(s) > 0 && s[0] >= '0' && s[0] <= '9' {
+				s, addr.rangeEnd, err = getNumberFromLine(s);
+				if err != nil {
+					return s, nil, err
+				}
+			} else {
+				addr.rangeEnd = 0	// to end of file
 			}
-		} else {
-			addr.rangeEnd = 0; // to end of file
 		}
 		return s, addr, nil;
 	}
@@ -106,7 +109,7 @@ func (s *Sed) lineMatchesAddress(addr *address) bool {
 	if addr != nil {
 		if addr.rangeEnd == 0 {
 			if s.lineNumber >= addr.rangeStart {
-				return true;
+				return true
 			}
 		} else if s.lineNumber >= addr.rangeStart && s.lineNumber <= addr.rangeEnd {
 			return true

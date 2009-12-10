@@ -4,6 +4,7 @@ s/foo/bar/g
 s/t//g
 s/more/MORE/1
 s/[oO]/0/2
+5,s/[iI]/1/2
 # n
 # d
 3a/ Append text\
@@ -15,7 +16,7 @@ s/s/5/g
 
 6i/Insert text\
 with another line\
-and one more.
+and one more. 
 
-i/:
+i/: 
 =
