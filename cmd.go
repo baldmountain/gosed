@@ -80,6 +80,14 @@ func getNumberFromLine(s []byte) ([]byte, int, os.Error) {
 func checkForAddress(s []byte) ([]byte, *address, os.Error) {
 	if s[0] == '/' {
 		// regular expression address
+	} else if s[0] == '$' {
+		// end of file
+		addr := new(address);
+		addr.rangeStart = -1;
+		addr.rangeEnd = -1;
+		addr.lastLine = true;
+		s = s[1:];
+		return s, addr, nil;
 	} else if s[0] >= '0' && s[0] <= '9' {
 		// numeric line address
 		addr := new(address);

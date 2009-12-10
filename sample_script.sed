@@ -1,5 +1,5 @@
 9,15H
-26g
+$g
 9,15d
 
 4P
@@ -19,9 +19,9 @@ s/s/5/g
 
 6i/Insert text\
 with another line\
-and one more. 
+and one more.
 
-1,7i/: 
+1,7i/:
 1,7=
 
 6D
