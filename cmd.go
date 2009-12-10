@@ -166,9 +166,6 @@ func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
 
 func copyByteSlice(a []byte) []byte {
 	newSlice := make([]byte, len(a));
-	// Copy data (could use bytes.Copy()).
-	for i, c := range a {
-		newSlice[i] = c
-	}
+	copy(newSlice, a);
 	return newSlice;
 }
