@@ -105,7 +105,8 @@ func checkForAddress(s []byte) ([]byte, *address, os.Error) {
 	return s, nil, nil;
 }
 
-func (s *Sed) lineMatchesAddress(addr *address) bool {
+func (s *Sed) shouldProcessCurrentLine(c Cmd) bool {
+	addr := c.getAddress();
 	if addr != nil {
 		if addr.rangeEnd == 0 {
 			if s.lineNumber >= addr.rangeStart {

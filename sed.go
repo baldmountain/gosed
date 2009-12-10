@@ -180,9 +180,11 @@ func (s *Sed) process() {
 		s.lineNumber++;
 		stop := false;
 		for c := range s.commands.Iter() {
-			if s.lineMatchesAddress(c.(Cmd).getAddress()) {
+			cmd := c.(Cmd);
+			// ask the sed if we should process this command, based on address
+			if s.shouldProcessCurrentLine(cmd) {
 			  var err os.Error;
-				stop, err = c.(Cmd).processLine(s);
+				stop, err = cmd.processLine(s);
 				if err != nil {
 					fmt.Printf("%v\n", err);
 					os.Exit(-1);
