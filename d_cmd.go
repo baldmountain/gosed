@@ -26,12 +26,14 @@
 package sed
 
 import (
+  "bytes";
 	"fmt";
 	"os";
 )
 
 type d_cmd struct {
 	command;
+	upToFirstNewLine bool;
 }
 
 func (c *d_cmd) String() string {
@@ -42,6 +44,13 @@ func (c *d_cmd) String() string {
 }
 
 func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {
+  if c.upToFirstNewLine {
+    idx := bytes.IndexByte(s.patternSpace, '\n');
+    if idx >= 0 && idx+1 < len(s.patternSpace) {
+      s.patternSpace = s.patternSpace[idx+1:];
+    	return false, nil
+    }
+  }
 	return true, nil
 }
 
@@ -52,6 +61,9 @@ func NewDCmd(pieces [][]byte, addr *address) (*d_cmd, os.Error) {
 		return nil, WrongNumberOfCommandParameters
 	}
 	cmd := new(d_cmd);
+	if pieces[0][0] == 'D' {
+	  cmd.upToFirstNewLine = true;
+	}
 	cmd.addr = addr;
 	return cmd, nil;
 }

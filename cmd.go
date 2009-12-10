@@ -142,7 +142,7 @@ func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
 			return NewSCmd(pieces, addr)
 		case 'q':
 			return NewQCmd(pieces, addr)
-		case 'd':
+		case 'd', 'D':
 			return NewDCmd(pieces, addr)
 		case 'P', 'p':
 			return NewPCmd(pieces, addr)
