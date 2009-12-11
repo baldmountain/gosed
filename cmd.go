@@ -65,21 +65,21 @@ type address struct {
 	regex		*regexp.Regexp;
 }
 
-func (a *address)getTypeAsString() string {
+func (a *address) getTypeAsString() string {
 	if a != nil {
 		switch a.address_type {
 		case ADDRESS_LINE:
-		return "ADDRESS_LINE"
+			return "ADDRESS_LINE"
 		case ADDRESS_RANGE:
-		return "ADDRESS_RANGE"
+			return "ADDRESS_RANGE"
 		case ADDRESS_TO_END_OF_FILE:
-		return "ADDRESS_TO_END_OF_FILE"
+			return "ADDRESS_TO_END_OF_FILE"
 		case ADDRESS_LAST_LINE:
-		return "ADDRESS_LAST_LINE"
+			return "ADDRESS_LAST_LINE"
 		case ADDRESS_REGEX:
 			return "ADDRESS_REGEX"
 		default:
-		return "ADDRESS_UNKNOWN"
+			return "ADDRESS_UNKNOWN"
 		}
 	}
 	return "nil";
@@ -132,11 +132,11 @@ func checkForAddress(s []byte) ([]byte, *address, os.Error) {
 		s = s[1:];
 		idx := bytes.IndexByte(s, '/');
 		if idx < 0 {
-		  return s, nil, UnterminatedRegularExpression;
+			return s, nil, UnterminatedRegularExpression
 		}
 		r := s[0:idx];
 		if len(r) == 0 {
-		  return s, nil, RegularExpressionExpected;
+			return s, nil, RegularExpressionExpected
 		}
 		// s is now just the command
 		s = s[idx+1:];
@@ -166,13 +166,13 @@ func checkForAddress(s []byte) ([]byte, *address, os.Error) {
 		if s[0] == ',' {
 			s = s[1:];
 			if len(s) > 0 && s[0] >= '0' && s[0] <= '9' {
-    		addr.address_type = ADDRESS_RANGE;
+				addr.address_type = ADDRESS_RANGE;
 				s, addr.rangeEnd, err = getNumberFromLine(s);
 				if err != nil {
 					return s, nil, err
 				}
 			} else {
-    		addr.address_type = ADDRESS_TO_END_OF_FILE;
+				addr.address_type = ADDRESS_TO_END_OF_FILE
 			}
 		}
 		return s, addr, nil;

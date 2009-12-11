@@ -38,7 +38,7 @@ type eql_cmd struct {
 }
 
 func (c *eql_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
-  return c.addr.match(line, lineNumber, totalNumberOfLines)
+	return c.addr.match(line, lineNumber, totalNumberOfLines)
 }
 
 func (c *eql_cmd) String() string {

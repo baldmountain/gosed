@@ -37,7 +37,7 @@ type g_cmd struct {
 }
 
 func (c *g_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
-  return c.addr.match(line, lineNumber, totalNumberOfLines)
+	return c.addr.match(line, lineNumber, totalNumberOfLines)
 }
 
 func (c *g_cmd) String() string {
