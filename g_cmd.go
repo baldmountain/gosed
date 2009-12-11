@@ -32,8 +32,28 @@ import (
 )
 
 type g_cmd struct {
-	command;
+	addr	*address;
 	replace	bool;
+}
+
+func (c *g_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
+	if c.addr != nil {
+		if c.addr.rangeEnd == 0 {
+			if lineNumber >= c.addr.rangeStart {
+				return true
+			}
+		} else if lineNumber >= c.addr.rangeStart && lineNumber <= c.addr.rangeEnd {
+			return true
+		}
+		if c.addr.lastLine && lineNumber == totalNumberOfLines {
+			return true
+		}
+		if c.addr.regex != nil {
+			return c.addr.regex.Match(line)
+		}
+		return false;
+	}
+	return true;
 }
 
 func (c *g_cmd) String() string {
@@ -48,16 +68,14 @@ func (c *g_cmd) String() string {
 }
 
 func (c *g_cmd) processLine(s *Sed) (bool, os.Error) {
-if c.replace {
-	s.patternSpace = copyByteSlice(s.holdSpace)
-} else {
-	s.patternSpace = bytes.AddByte(s.patternSpace, '\n');
-	s.patternSpace = bytes.Add(s.patternSpace, s.holdSpace);
-}
+	if c.replace {
+		s.patternSpace = copyByteSlice(s.holdSpace)
+	} else {
+		s.patternSpace = bytes.AddByte(s.patternSpace, '\n');
+		s.patternSpace = bytes.Add(s.patternSpace, s.holdSpace);
+	}
 	return false, nil;
 }
-
-func (c *g_cmd) getAddress() *address	{ return c.addr }
 
 func NewGCmd(pieces [][]byte, addr *address) (*g_cmd, os.Error) {
 	if len(pieces) > 1 {

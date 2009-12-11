@@ -26,14 +26,34 @@
 package sed
 
 import (
-  "bytes";
+	"bytes";
 	"fmt";
 	"os";
 )
 
 type d_cmd struct {
-	command;
-	upToFirstNewLine bool;
+	addr			*address;
+	upToFirstNewLine	bool;
+}
+
+func (c *d_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
+	if c.addr != nil {
+		if c.addr.rangeEnd == 0 {
+			if lineNumber >= c.addr.rangeStart {
+				return true
+			}
+		} else if lineNumber >= c.addr.rangeStart && lineNumber <= c.addr.rangeEnd {
+			return true
+		}
+		if c.addr.lastLine && lineNumber == totalNumberOfLines {
+			return true
+		}
+		if c.addr.regex != nil {
+			return c.addr.regex.Match(line)
+		}
+		return false;
+	}
+	return true;
 }
 
 func (c *d_cmd) String() string {
@@ -44,17 +64,15 @@ func (c *d_cmd) String() string {
 }
 
 func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {
-  if c.upToFirstNewLine {
-    idx := bytes.IndexByte(s.patternSpace, '\n');
-    if idx >= 0 && idx+1 < len(s.patternSpace) {
-      s.patternSpace = s.patternSpace[idx+1:];
-    	return false, nil
-    }
-  }
-	return true, nil
+	if c.upToFirstNewLine {
+		idx := bytes.IndexByte(s.patternSpace, '\n');
+		if idx >= 0 && idx+1 < len(s.patternSpace) {
+			s.patternSpace = s.patternSpace[idx+1:];
+			return false, nil;
+		}
+	}
+	return true, nil;
 }
-
-func (c *d_cmd) getAddress() *address	{ return c.addr }
 
 func NewDCmd(pieces [][]byte, addr *address) (*d_cmd, os.Error) {
 	if len(pieces) > 1 {
@@ -62,7 +80,7 @@ func NewDCmd(pieces [][]byte, addr *address) (*d_cmd, os.Error) {
 	}
 	cmd := new(d_cmd);
 	if pieces[0][0] == 'D' {
-	  cmd.upToFirstNewLine = true;
+		cmd.upToFirstNewLine = true
 	}
 	cmd.addr = addr;
 	return cmd, nil;

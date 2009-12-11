@@ -32,8 +32,28 @@ import (
 )
 
 type p_cmd struct {
-	command;
+	addr		*address;
 	upToNewLine	bool;
+}
+
+func (c *p_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
+	if c.addr != nil {
+		if c.addr.rangeEnd == 0 {
+			if lineNumber >= c.addr.rangeStart {
+				return true
+			}
+		} else if lineNumber >= c.addr.rangeStart && lineNumber <= c.addr.rangeEnd {
+			return true
+		}
+		if c.addr.lastLine && lineNumber == totalNumberOfLines {
+			return true
+		}
+		if c.addr.regex != nil {
+			return c.addr.regex.Match(line)
+		}
+		return false;
+	}
+	return true;
 }
 
 func (c *p_cmd) String() string {
@@ -53,8 +73,6 @@ func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
 	}
 	return false, nil;
 }
-
-func (c *p_cmd) getAddress() *address	{ return c.addr }
 
 func NewPCmd(pieces [][]byte, addr *address) (*p_cmd, os.Error) {
 	if len(pieces) > 1 {

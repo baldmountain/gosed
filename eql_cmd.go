@@ -34,7 +34,27 @@ import (
 )
 
 type eql_cmd struct {
-	command;
+	addr *address;
+}
+
+func (c *eql_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
+	if c.addr != nil {
+		if c.addr.rangeEnd == 0 {
+			if lineNumber >= c.addr.rangeStart {
+				return true
+			}
+		} else if lineNumber >= c.addr.rangeStart && lineNumber <= c.addr.rangeEnd {
+			return true
+		}
+		if c.addr.lastLine && lineNumber == totalNumberOfLines {
+			return true
+		}
+		if c.addr.regex != nil {
+			return c.addr.regex.Match(line)
+		}
+		return false;
+	}
+	return true;
 }
 
 func (c *eql_cmd) String() string {
@@ -53,8 +73,6 @@ func (c *eql_cmd) processLine(s *Sed) (bool, os.Error) {
 	return false, nil;
 	return false, nil;
 }
-
-func (c *eql_cmd) getAddress() *address	{ return c.addr }
 
 func NewEqlCmd(pieces [][]byte, addr *address) (*eql_cmd, os.Error) {
 	if len(pieces) > 1 {

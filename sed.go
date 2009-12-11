@@ -66,6 +66,7 @@ var newLine = []byte{'\n'}
 type Sed struct {
 	inputLines		[][]byte;
 	lineNumber		int;
+	totalNumberOfLines	int;
 	commands		*vector.Vector;
 	outputFile		*os.File;
 	patternSpace, holdSpace	[]byte;
@@ -98,6 +99,7 @@ func (s *Sed) readInputFile() {
 		os.Exit(-1);
 	}
 	s.inputLines = bytes.Split(b, newLine, 0);
+	s.totalNumberOfLines = len(s.inputLines);
 }
 
 func (s *Sed) getNextScriptLine() ([]byte, os.Error) {
@@ -180,11 +182,10 @@ func (s *Sed) process() {
 		s.lineNumber++;
 		stop := false;
 		for c := range s.commands.Iter() {
-			cmd := c.(Cmd);
 			// ask the sed if we should process this command, based on address
-			if s.shouldProcessCurrentLine(cmd) {
-			  var err os.Error;
-				stop, err = cmd.processLine(s);
+			if c.(Address).match(s.patternSpace, s.lineNumber, s.totalNumberOfLines) {
+				var err os.Error;
+				stop, err = c.(Cmd).processLine(s);
 				if err != nil {
 					fmt.Printf("%v\n", err);
 					os.Exit(-1);
@@ -194,7 +195,7 @@ func (s *Sed) process() {
 				}
 			}
 		}
-		if !*quiet  && !stop {
+		if !*quiet && !stop {
 			s.printPatternSpace()
 		}
 	}

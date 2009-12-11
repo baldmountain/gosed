@@ -42,8 +42,11 @@ var (
 
 type Cmd interface {
 	fmt.Stringer;
-	getAddress() *address;
 	processLine(s *Sed) (stop bool, err os.Error);
+}
+
+type Address interface {
+	match(line []byte, lineNumber, totalNumberOfLines int) bool;
 }
 
 type address struct {
@@ -51,10 +54,6 @@ type address struct {
 	rangeEnd	int;
 	lastLine	bool;
 	regex		*regexp.Regexp;
-}
-
-type command struct {
-	addr *address;
 }
 
 func (a *address) String() string {
@@ -111,27 +110,6 @@ func checkForAddress(s []byte) ([]byte, *address, os.Error) {
 		return s, addr, nil;
 	}
 	return s, nil, nil;
-}
-
-func (s *Sed) shouldProcessCurrentLine(c Cmd) bool {
-	addr := c.getAddress();
-	if addr != nil {
-		if addr.rangeEnd == 0 {
-			if s.lineNumber >= addr.rangeStart {
-				return true
-			}
-		} else if s.lineNumber >= addr.rangeStart && s.lineNumber <= addr.rangeEnd {
-			return true
-		}
-		if addr.lastLine && s.lineNumber == len(s.inputLines) {
-			return true
-		}
-		if addr.regex != nil {
-			return addr.regex.Match(s.patternSpace)
-		}
-		return false;
-	}
-	return true;
 }
 
 func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {

@@ -44,9 +44,6 @@ func TestNewCmd(t *testing.T) {
 	// s
 	pieces = []byte{'s', '/', 'o', '/', '0', '/', 'g'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() != nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	}
 	sc := c.(*s_cmd);
 	if sc == nil {
 		t.Error("Didn't get a command that we expected")
@@ -84,9 +81,6 @@ func TestNewDCmd(t *testing.T) {
 
 	pieces = []byte{'d'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() != nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	}
 	dc = c.(*d_cmd);
 	if dc == nil {
 		t.Error("Didn't get a d command that we expected")
@@ -96,11 +90,6 @@ func TestNewDCmd(t *testing.T) {
 
 	pieces = []byte{'$', 'd'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() == nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	} else if a := c.getAddress(); a.rangeStart != -1 || !a.lastLine || a.regex != nil {
-		t.Error("Did not get the address we expected: " + a.String())
-	}
 	dc = c.(*d_cmd);
 	if dc == nil {
 		t.Error("Didn't get a d command that we expected")
@@ -110,11 +99,6 @@ func TestNewDCmd(t *testing.T) {
 
 	pieces = []byte{'4', '5', '7', 'd'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() == nil {
-		t.Error("Did not get an address when we should have " + c.String())
-	} else if a := c.getAddress(); a.rangeStart != 457 || a.lastLine || a.regex != nil {
-		t.Error("Did not get the address we expected: " + a.String())
-	}
 	dc = c.(*d_cmd);
 	if dc == nil {
 		t.Error("Didn't get a d command that we expected")
@@ -153,9 +137,6 @@ func TestNewNCmd(t *testing.T) {
 
 	pieces = []byte{'n'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() != nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	}
 	nc = c.(*n_cmd);
 	if nc == nil {
 		t.Error("Didn't get a n command that we expected")
@@ -165,11 +146,6 @@ func TestNewNCmd(t *testing.T) {
 
 	pieces = []byte{'$', 'n'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() == nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	} else if a := c.getAddress(); a.rangeStart != -1 || !a.lastLine || a.regex != nil {
-		t.Error("Did not get the address we expected: " + a.String())
-	}
 	nc = c.(*n_cmd);
 	if nc == nil {
 		t.Error("Didn't get a d command that we expected")
@@ -179,11 +155,6 @@ func TestNewNCmd(t *testing.T) {
 
 	pieces = []byte{'4', '5', '7', 'n'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() == nil {
-		t.Error("Didn't get an address when we should have " + c.String())
-	} else if a := c.getAddress(); a.rangeStart != 457 || a.lastLine || a.regex != nil {
-		t.Error("Did not get the address we expected: " + a.String())
-	}
 	nc = c.(*n_cmd);
 	if nc == nil {
 		t.Error("Didn't get a n command that we expected")
@@ -222,9 +193,6 @@ func TestNewPCmd(t *testing.T) {
 
 	pieces = []byte{'P'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() != nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	}
 	pc = c.(*p_cmd);
 	if pc == nil {
 		t.Error("Didn't get a p command that we expected")
@@ -234,11 +202,6 @@ func TestNewPCmd(t *testing.T) {
 
 	pieces = []byte{'$', 'P'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() == nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	} else if a := c.getAddress(); a.rangeStart != -1 || !a.lastLine || a.regex != nil {
-		t.Error("Did not get the address we expected: " + a.String())
-	}
 	pc = c.(*p_cmd);
 	if pc == nil {
 		t.Error("Didn't get a p command that we expected")
@@ -248,11 +211,6 @@ func TestNewPCmd(t *testing.T) {
 
 	pieces = []byte{'4', '5', '7', 'P'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() == nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	} else if a := c.getAddress(); a.rangeStart != 457 || a.lastLine || a.regex != nil {
-		t.Error("Did not get the address we expected: " + a.String())
-	}
 	pc = c.(*p_cmd);
 	if pc == nil {
 		t.Error("Didn't get a p command that we expected")
@@ -288,9 +246,6 @@ func TestNewQCmd(t *testing.T) {
 
 	pieces = []byte{'q'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() != nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	}
 	qc = c.(*q_cmd);
 	if qc == nil {
 		t.Error("Didn't get a q command that we expected")
@@ -300,9 +255,6 @@ func TestNewQCmd(t *testing.T) {
 
 	pieces = []byte{'q', '/', '1'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() != nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	}
 	qc = c.(*q_cmd);
 	if qc == nil {
 		t.Error("Didn't get a q command that we expected")
@@ -312,11 +264,6 @@ func TestNewQCmd(t *testing.T) {
 
 	pieces = []byte{'$', 'q'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() == nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	} else if a := c.getAddress(); a.rangeStart != -1 || !a.lastLine || a.regex != nil {
-		t.Error("Did not get the address we expected: " + a.String())
-	}
 	qc = c.(*q_cmd);
 	if qc == nil {
 		t.Error("Didn't get a q command that we expected")
@@ -326,11 +273,6 @@ func TestNewQCmd(t *testing.T) {
 
 	pieces = []byte{'4', '5', '7', 'q'};
 	c, err = NewCmd(nil, pieces);
-	if c.getAddress() == nil {
-		t.Error("Got an address when we shouldn't have " + c.String())
-	} else if a := c.getAddress(); a.rangeStart != 457 || a.lastLine || a.regex != nil {
-		t.Error("Did not get the address we expected: " + a.String())
-	}
 	qc = c.(*q_cmd);
 	if qc == nil {
 		t.Error("Didn't get a d command that we expected")

@@ -38,11 +38,31 @@ const (
 )
 
 type s_cmd struct {
-	command;
+	addr	*address;
 	regex	string;
 	replace	[]byte;
 	count	int;
 	re	*regexp.Regexp;
+}
+
+func (c *s_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
+	if c.addr != nil {
+		if c.addr.rangeEnd == 0 {
+			if lineNumber >= c.addr.rangeStart {
+				return true
+			}
+		} else if lineNumber >= c.addr.rangeStart && lineNumber <= c.addr.rangeEnd {
+			return true
+		}
+		if c.addr.lastLine && lineNumber == totalNumberOfLines {
+			return true
+		}
+		if c.addr.regex != nil {
+			return c.addr.regex.Match(line)
+		}
+		return false;
+	}
+	return true;
 }
 
 func (c *s_cmd) String() string {
@@ -90,8 +110,6 @@ func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
 
 	return c, err;
 }
-
-func (c *s_cmd) getAddress() *address	{ return c.addr }
 
 func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
 	stop, err = false, nil;
