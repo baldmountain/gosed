@@ -46,23 +46,7 @@ type s_cmd struct {
 }
 
 func (c *s_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
-	if c.addr != nil {
-		if c.addr.rangeEnd == 0 {
-			if lineNumber >= c.addr.rangeStart {
-				return true
-			}
-		} else if lineNumber >= c.addr.rangeStart && lineNumber <= c.addr.rangeEnd {
-			return true
-		}
-		if c.addr.lastLine && lineNumber == totalNumberOfLines {
-			return true
-		}
-		if c.addr.regex != nil {
-			return c.addr.regex.Match(line)
-		}
-		return false;
-	}
-	return true;
+  return c.addr.match(line, lineNumber, totalNumberOfLines)
 }
 
 func (c *s_cmd) String() string {

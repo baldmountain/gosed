@@ -38,6 +38,7 @@ var (
 	UnknownScriptCommand		os.Error	= os.ErrorString("Unknown script command");
 	InvalidSCommandFlag		os.Error	= os.ErrorString("Invalid flag for s command");
 	RegularExpressionExpected	os.Error	= os.ErrorString("Expected a regular expression, got zero length string");
+	UnterminatedRegularExpression	os.Error	= os.ErrorString("Unterminated regular expression");
 )
 
 type Cmd interface {
@@ -49,15 +50,63 @@ type Address interface {
 	match(line []byte, lineNumber, totalNumberOfLines int) bool;
 }
 
+const (
+	ADDRESS_LINE	= iota;
+	ADDRESS_RANGE;
+	ADDRESS_TO_END_OF_FILE;
+	ADDRESS_LAST_LINE;
+	ADDRESS_REGEX;
+)
+
 type address struct {
+	address_type	int;
 	rangeStart	int;
 	rangeEnd	int;
-	lastLine	bool;
 	regex		*regexp.Regexp;
 }
 
+func (a *address)getTypeAsString() string {
+	if a != nil {
+		switch a.address_type {
+		case ADDRESS_LINE:
+		return "ADDRESS_LINE"
+		case ADDRESS_RANGE:
+		return "ADDRESS_RANGE"
+		case ADDRESS_TO_END_OF_FILE:
+		return "ADDRESS_TO_END_OF_FILE"
+		case ADDRESS_LAST_LINE:
+		return "ADDRESS_LAST_LINE"
+		case ADDRESS_REGEX:
+			return "ADDRESS_REGEX"
+		default:
+		return "ADDRESS_UNKNOWN"
+		}
+	}
+	return "nil";
+}
+
 func (a *address) String() string {
-	return fmt.Sprintf("address{rangeStart:%d rangeEnd:%d lastLine:%t regex:%v}", a.rangeStart, a.rangeEnd, a.lastLine, a.regex)
+	return fmt.Sprintf("address{type: %s rangeStart:%d rangeEnd:%d regex:%v}", a.getTypeAsString(), a.rangeStart, a.rangeEnd, a.regex)
+}
+
+func (a *address) match(line []byte, lineNumber, totalNumberOfLines int) bool {
+	if a != nil {
+		switch a.address_type {
+		case ADDRESS_LINE:
+			return lineNumber == a.rangeStart
+		case ADDRESS_RANGE:
+			return lineNumber >= a.rangeStart && lineNumber <= a.rangeEnd
+		case ADDRESS_TO_END_OF_FILE:
+			return lineNumber >= a.rangeStart
+		case ADDRESS_LAST_LINE:
+			return lineNumber == totalNumberOfLines
+		case ADDRESS_REGEX:
+			return a.regex.Match(line)
+		default:
+			return false
+		}
+	}
+	return true;
 }
 
 func getNumberFromLine(s []byte) ([]byte, int, os.Error) {
@@ -77,20 +126,38 @@ func getNumberFromLine(s []byte) ([]byte, int, os.Error) {
 
 // A nil address means match any line
 func checkForAddress(s []byte) ([]byte, *address, os.Error) {
+	var err os.Error;
 	if s[0] == '/' {
 		// regular expression address
+		s = s[1:];
+		idx := bytes.IndexByte(s, '/');
+		if idx < 0 {
+		  return s, nil, UnterminatedRegularExpression;
+		}
+		r := s[0:idx];
+		if len(r) == 0 {
+		  return s, nil, RegularExpressionExpected;
+		}
+		// s is now just the command
+		s = s[idx+1:];
+		addr := new(address);
+		addr.address_type = ADDRESS_REGEX;
+		addr.regex, err = regexp.Compile(string(r));
+		if err != nil {
+			return s, nil, err
+		}
+		return s, addr, nil;
 	} else if s[0] == '$' {
 		// end of file
 		addr := new(address);
-		addr.rangeStart = -1;
-		addr.rangeEnd = -1;
-		addr.lastLine = true;
+		addr.address_type = ADDRESS_LAST_LINE;
+		// s is now just the command
 		s = s[1:];
 		return s, addr, nil;
 	} else if s[0] >= '0' && s[0] <= '9' {
 		// numeric line address
 		addr := new(address);
-		var err os.Error;
+		addr.address_type = ADDRESS_LINE;
 		s, addr.rangeStart, err = getNumberFromLine(s);
 		if err != nil {
 			return s, nil, err
@@ -99,12 +166,13 @@ func checkForAddress(s []byte) ([]byte, *address, os.Error) {
 		if s[0] == ',' {
 			s = s[1:];
 			if len(s) > 0 && s[0] >= '0' && s[0] <= '9' {
+    		addr.address_type = ADDRESS_RANGE;
 				s, addr.rangeEnd, err = getNumberFromLine(s);
 				if err != nil {
 					return s, nil, err
 				}
 			} else {
-				addr.rangeEnd = 0	// to end of file
+    		addr.address_type = ADDRESS_TO_END_OF_FILE;
 			}
 		}
 		return s, addr, nil;
