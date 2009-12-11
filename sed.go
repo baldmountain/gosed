@@ -229,11 +229,25 @@ func Main() {
 			scriptBuffer = sb;
 		} else if flag.NArg() > 1 {
 			scriptBuffer = strings.Bytes(flag.Arg(0));
+  		// change semicoluns to newlines for scripts on command line
+  		idx := bytes.IndexByte(scriptBuffer, ';');
+  		for idx >= 0 {
+  		  scriptBuffer[idx] = '\n';
+  		  s := scriptBuffer[idx+1:];
+    		idx = bytes.IndexByte(s, ';');
+  		}
 			// first parameter was the script so move to second parameter
 			currentFileParameter++;
 		}
 	} else {
-		scriptBuffer = strings.Bytes(*script)
+		scriptBuffer = strings.Bytes(*script);
+		// change semicoluns to newlines for scripts on command line
+		idx := bytes.IndexByte(scriptBuffer, ';');
+		for idx >= 0 {
+		  scriptBuffer[idx] = '\n';
+		  s := scriptBuffer[idx+1:];
+  		idx = bytes.IndexByte(s, ';');
+		}
 	}
 
 	// if script still isn't set we are screwed, exit.
