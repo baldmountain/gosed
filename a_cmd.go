@@ -36,8 +36,8 @@ type a_cmd struct {
 	text	[]byte;
 }
 
-func (c *a_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
-	return c.addr.match(line, lineNumber, totalNumberOfLines)
+func (c *a_cmd) match(line []byte, lineNumber int) bool {
+	return c.addr.match(line, lineNumber)
 }
 
 func (c *a_cmd) String() string {

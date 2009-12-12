@@ -36,8 +36,8 @@ type p_cmd struct {
 	upToNewLine	bool;
 }
 
-func (c *p_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
-	return c.addr.match(line, lineNumber, totalNumberOfLines)
+func (c *p_cmd) match(line []byte, lineNumber int) bool {
+	return c.addr.match(line, lineNumber)
 }
 
 func (c *p_cmd) String() string {

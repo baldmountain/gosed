@@ -37,8 +37,8 @@ type eql_cmd struct {
 	addr *address;
 }
 
-func (c *eql_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
-	return c.addr.match(line, lineNumber, totalNumberOfLines)
+func (c *eql_cmd) match(line []byte, lineNumber int) bool {
+	return c.addr.match(line, lineNumber)
 }
 
 func (c *eql_cmd) String() string {

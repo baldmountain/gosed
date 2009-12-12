@@ -36,8 +36,8 @@ type d_cmd struct {
 	upToFirstNewLine	bool;
 }
 
-func (c *d_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
-	return c.addr.match(line, lineNumber, totalNumberOfLines)
+func (c *d_cmd) match(line []byte, lineNumber int) bool {
+	return c.addr.match(line, lineNumber)
 }
 
 func (c *d_cmd) String() string {

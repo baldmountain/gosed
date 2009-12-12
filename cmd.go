@@ -47,7 +47,7 @@ type Cmd interface {
 }
 
 type Address interface {
-	match(line []byte, lineNumber, totalNumberOfLines int) bool;
+	match(line []byte, lineNumber int) bool;
 }
 
 const (
@@ -89,7 +89,7 @@ func (a *address) String() string {
 	return fmt.Sprintf("address{type: %s rangeStart:%d rangeEnd:%d regex:%v}", a.getTypeAsString(), a.rangeStart, a.rangeEnd, a.regex)
 }
 
-func (a *address) match(line []byte, lineNumber, totalNumberOfLines int) bool {
+func (a *address) match(line []byte, lineNumber int) bool {
 	if a != nil {
 		switch a.address_type {
 		case ADDRESS_LINE:
@@ -99,7 +99,7 @@ func (a *address) match(line []byte, lineNumber, totalNumberOfLines int) bool {
 		case ADDRESS_TO_END_OF_FILE:
 			return lineNumber >= a.rangeStart
 		case ADDRESS_LAST_LINE:
-			return lineNumber == totalNumberOfLines
+			return false	// this is wrong!
 		case ADDRESS_REGEX:
 			return a.regex.Match(line)
 		default:
@@ -217,10 +217,4 @@ func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
 	}
 
 	return nil, UnknownScriptCommand;
-}
-
-func copyByteSlice(a []byte) []byte {
-	newSlice := make([]byte, len(a));
-	copy(newSlice, a);
-	return newSlice;
 }

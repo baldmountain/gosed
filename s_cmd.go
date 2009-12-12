@@ -45,8 +45,8 @@ type s_cmd struct {
 	re	*regexp.Regexp;
 }
 
-func (c *s_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
-	return c.addr.match(line, lineNumber, totalNumberOfLines)
+func (c *s_cmd) match(line []byte, lineNumber int) bool {
+	return c.addr.match(line, lineNumber)
 }
 
 func (c *s_cmd) String() string {

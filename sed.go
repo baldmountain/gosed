@@ -26,12 +26,15 @@
 package sed
 
 import (
+	"bufio";
 	"bytes";
 	"container/vector";
 	"flag";
 	"fmt";
+	"io";
 	"io/ioutil";
 	"os";
+	"strconv";
 	"strings";
 	"unicode";
 	"utf8";
@@ -64,9 +67,9 @@ var usageShown bool = false
 var newLine = []byte{'\n'}
 
 type Sed struct {
-	inputLines		[][]byte;
+	inputFile			*os.File;
+	input			*bufio.Reader;
 	lineNumber		int;
-	totalNumberOfLines	int;
 	commands		*vector.Vector;
 	outputFile		*os.File;
 	patternSpace, holdSpace	[]byte;
@@ -81,6 +84,12 @@ func (s *Sed) Init() {
 	s.holdSpace = make([]byte, 0);
 }
 
+func copyByteSlice(a []byte) []byte {
+	newSlice := make([]byte, len(a));
+	copy(newSlice, a);
+	return newSlice;
+}
+
 func usage() {
 	// only show usage once.
 	if !usageShown {
@@ -91,16 +100,6 @@ func usage() {
 }
 
 var inputFilename string
-
-func (s *Sed) readInputFile() {
-	b, err := ioutil.ReadFile(inputFilename);
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading input file %s\n", inputFilename);
-		os.Exit(-1);
-	}
-	s.inputLines = bytes.Split(b, newLine, 0);
-	s.totalNumberOfLines = len(s.inputLines);
-}
 
 func (s *Sed) getNextScriptLine() ([]byte, os.Error) {
 	if s.scriptLineNumber < len(s.scriptLines) {
@@ -177,13 +176,19 @@ func (s *Sed) process() {
 	if *treat_files_as_seperate || *edit_inplace {
 		s.lineNumber = 0
 	}
-	for _, s.patternSpace = range s.inputLines {
+	var err os.Error;
+	s.patternSpace, err = s.input.ReadSlice('\n');
+	for err != os.EOF {
+		lineLength := len(s.patternSpace);
+		if lineLength > 0 {
+			s.patternSpace = s.patternSpace[0 : lineLength-1]
+		}
 		// track line number starting with line 1
 		s.lineNumber++;
 		stop := false;
 		for c := range s.commands.Iter() {
 			// ask the sed if we should process this command, based on address
-			if c.(Address).match(s.patternSpace, s.lineNumber, s.totalNumberOfLines) {
+			if c.(Address).match(s.patternSpace, s.lineNumber) {
 				var err os.Error;
 				stop, err = c.(Cmd).processLine(s);
 				if err != nil {
@@ -198,10 +203,12 @@ func (s *Sed) process() {
 		if !*quiet && !stop {
 			s.printPatternSpace()
 		}
+		s.patternSpace, err = s.input.ReadSlice('\n');
 	}
 }
 
 func Main() {
+  var err os.Error;
 	s := new(Sed);
 	s.Init();
 	flag.Parse();
@@ -261,31 +268,70 @@ func Main() {
 	s.parseScript(scriptBuffer);
 
 	if currentFileParameter >= flag.NArg() {
-		fmt.Fprint(os.Stderr, "No input file specified.\n\n");
-		usage();
-		os.Exit(-1);
-	}
-
-	for ; currentFileParameter < flag.NArg(); currentFileParameter++ {
-		inputFilename = flag.Arg(currentFileParameter);
-		// actually do the processing
-		s.readInputFile();
-		if *edit_inplace {
-			dir, err := os.Stat(inputFilename);
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error getting information about input file: %s %v\n", err);
-				os.Exit(-1);
-			}
-			f, err := os.Open(inputFilename, os.O_WRONLY|os.O_TRUNC, int(dir.Mode));
-			if err != nil {
-				fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s %v\n", err);
-				os.Exit(-1);
-			}
-			s.outputFile = f;
+	  if *edit_inplace {
+			fmt.Fprintf(os.Stderr, "Warning: Option -i ignored\n");
 		}
+		s.input = bufio.NewReader(os.Stdin);
 		s.process();
-		if *edit_inplace {
-			s.outputFile.Close()
+	} else {
+		for ; currentFileParameter < flag.NArg(); currentFileParameter++ {
+			inputFilename = flag.Arg(currentFileParameter);
+			// actually do the processing
+			s.inputFile, err = os.Open(inputFilename, os.O_RDONLY, 0);
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error openint input file: %s.\n\n", inputFilename);
+				usage();
+				os.Exit(-1);
+			}
+			s.input = bufio.NewReader(s.inputFile);
+			var tempFilename string;
+			if *edit_inplace {
+				tempFilename = inputFilename + ".tmp";
+				tmpc := 0;
+				dir, _ := os.Stat(tempFilename);
+				for dir != nil {
+					tmpc++;
+					tempFilename = inputFilename + "-" + strconv.Itoa(tmpc) + ".tmp";
+					dir, _ = os.Stat(tempFilename);
+				}
+				f, err := os.Open(tempFilename, os.O_RDWR|os.O_TRUNC|os.O_CREAT, 0600);
+				if err != nil {
+				  s.inputFile.Close();
+					fmt.Fprintf(os.Stderr, "Error opening temp file file for inplace editing: %s\n", err.String());
+					os.Exit(-1);
+				}
+				s.outputFile = f;
+			}
+			s.process();
+			// done processing, close input file
+		  s.inputFile.Close();
+		  s.input = nil;
+			if *edit_inplace {
+				s.outputFile.Seek(0, 0);
+				// find out about
+				dir, err := os.Stat(inputFilename);
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error getting information about input file: %s %v\n", err);
+					// os.Remove(tempFilename);
+					os.Exit(-1);
+				}
+				// reopen input file
+				s.inputFile, err = os.Open(inputFilename, os.O_WRONLY|os.O_TRUNC, int(dir.Mode));
+				if err != nil {
+					fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s\n", err.String());
+					// os.Remove(tempFilename);
+					os.Exit(-1);
+				}
+
+				_,e := io.Copy(s.inputFile, s.outputFile);
+				s.outputFile.Close();
+				s.inputFile.Close();
+				if e != nil {
+					fmt.Fprintf(os.Stderr, "Error copying temp file back to input file: %s\nFull output is in %s", err.String(), tempFilename);
+				} else {
+  				os.Remove(tempFilename);
+				}
+			}
 		}
 	}
 }

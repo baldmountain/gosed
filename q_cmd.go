@@ -36,8 +36,8 @@ type q_cmd struct {
 	exit_code	int;
 }
 
-func (c *q_cmd) match(line []byte, lineNumber, totalNumberOfLines int) bool {
-	return c.addr.match(line, lineNumber, totalNumberOfLines)
+func (c *q_cmd) match(line []byte, lineNumber int) bool {
+	return c.addr.match(line, lineNumber)
 }
 
 func (c *q_cmd) String() string {
