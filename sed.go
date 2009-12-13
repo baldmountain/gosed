@@ -137,16 +137,16 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 		// line = bytes.TrimSpace(line);
 		line = trimSpaceFromBeginning(line)
 		if len(line) == 0 {
-		  // zero length line
+			// zero length line
 			continue
 		}
 		if line[0] == '#' {
-		  if s.scriptLineNumber == 1 && len(line) > 1 && line[1] == 'n' {
-		    // spcial case where the first 2 characters of the file are #n which is
-		    // equivalent to passing -n on the command line
-		    *quiet = true
-		  }
-		  continue
+			if s.scriptLineNumber == 1 && len(line) > 1 && line[1] == 'n' {
+				// spcial case where the first 2 characters of the file are #n which is
+				// equivalent to passing -n on the command line
+				*quiet = true
+			}
+			continue
 		}
 		c, err := NewCmd(s, line)
 		if err != nil {
@@ -192,7 +192,7 @@ func (s *Sed) process() {
 		if lineLength > 0 {
 			s.patternSpace = s.patternSpace[0 : lineLength-1]
 		}
-	  s.currentLine = string(s.patternSpace)
+		s.currentLine = string(s.patternSpace)
 		// track line number starting with line 1
 		s.lineNumber++
 		stop := false

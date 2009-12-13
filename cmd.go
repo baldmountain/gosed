@@ -39,8 +39,8 @@ var (
 	InvalidSCommandFlag		os.Error	= os.ErrorString("Invalid flag for s command")
 	RegularExpressionExpected	os.Error	= os.ErrorString("Expected a regular expression, got zero length string")
 	UnterminatedRegularExpression	os.Error	= os.ErrorString("Unterminated regular expression")
-	NoSupportForTwoAddress	os.Error	= os.ErrorString("This command doesn't support an address range or to end of file")
-	NotImplemented	os.Error	= os.ErrorString("This command command hasn't been implemented yet")
+	NoSupportForTwoAddress		os.Error	= os.ErrorString("This command doesn't support an address range or to end of file")
+	NotImplemented			os.Error	= os.ErrorString("This command command hasn't been implemented yet")
 )
 
 type Cmd interface {
@@ -61,7 +61,7 @@ const (
 )
 
 type address struct {
-  not bool
+	not		bool
 	address_type	int
 	rangeStart	int
 	rangeEnd	int
@@ -93,7 +93,7 @@ func (a *address) String() string {
 }
 
 func (a *address) match(line []byte, lineNumber int) bool {
-  val := true
+	val := true
 	if a != nil {
 		switch a.address_type {
 		case ADDRESS_LINE:
@@ -110,7 +110,7 @@ func (a *address) match(line []byte, lineNumber int) bool {
 			val = false
 		}
 		if a.not {
-		  val = !val
+			val = !val
 		}
 	}
 	return val
@@ -180,8 +180,8 @@ func checkForAddress(s []byte) ([]byte, *address, os.Error) {
 				}
 				// if end range is less than start only match single line
 				if addr.rangeEnd < addr.rangeStart {
-      		addr.address_type = ADDRESS_LINE
-      		addr.rangeEnd = 0;
+					addr.address_type = ADDRESS_LINE
+					addr.rangeEnd = 0
 				}
 			} else {
 				addr.address_type = ADDRESS_TO_END_OF_FILE
