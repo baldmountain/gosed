@@ -136,9 +136,17 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 	for line, serr = s.getNextScriptLine(); serr == nil; line, serr = s.getNextScriptLine() {
 		// line = bytes.TrimSpace(line);
 		line = trimSpaceFromBeginning(line)
-		if bytes.HasPrefix(line, []byte{'#'}) || len(line) == 0 {
-			// comment
+		if len(line) == 0 {
+		  // zero length line
 			continue
+		}
+		if line[0] == '#' {
+		  if s.scriptLineNumber == 1 && len(line) > 1 && line[1] == 'n' {
+		    // spcial case where the first 2 characters of the file are #n which is
+		    // equivalent to passing -n on the command line
+		    *quiet = true
+		  }
+		  continue
 		}
 		c, err := NewCmd(s, line)
 		if err != nil {

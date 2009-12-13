@@ -52,19 +52,16 @@ func (c *a_cmd) String() string {
 
 func (c *a_cmd) processLine(s *Sed) (bool, os.Error) {
   fmt.Fprint(os.Stdout, string(c.text))
-	return false, nil
+	return true, nil
 }
 
-func NewACmd(s *Sed, pieces [][]byte, addr *address) (*a_cmd, os.Error) {
-	if len(pieces) != 2 {
-		return nil, WrongNumberOfCommandParameters
-	}
+func NewACmd(s *Sed, line []byte, addr *address) (*a_cmd, os.Error) {
 	if addr != nil  && (addr.address_type == ADDRESS_RANGE || addr.address_type == ADDRESS_TO_END_OF_FILE) {
 		return nil, NoSupportForTwoAddress
 	}
 	cmd := new(a_cmd)
 	cmd.addr = addr
-	cmd.text = pieces[1]
+	cmd.text = line[1:]
 	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
 		cmd.text = cmd.text[0 : len(cmd.text)-1]
 		line, err := s.getNextScriptLine()

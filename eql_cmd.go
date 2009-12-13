@@ -46,7 +46,7 @@ func (c *eql_cmd) String() string {
 }
 
 func (c *eql_cmd) processLine(s *Sed) (bool, os.Error) {
-	fmt.Fprintf(os.Stdout, "%d\n", s.lineNumber)
+	fmt.Fprintf(os.Stdout, "\n%d\n", s.lineNumber)
 	return false, nil
 }
 

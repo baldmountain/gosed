@@ -222,11 +222,11 @@ func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
 		case '=':
 			return NewEqlCmd(pieces, addr)
 		case 'a':
-			return NewACmd(s, pieces, addr)
+			return NewACmd(s, line, addr)
 		case 'b':
 			return NewBCmd(pieces, addr)
 		case 'i':
-			return NewICmd(s, pieces, addr)
+			return NewICmd(s, line, addr)
 		case 'g', 'G':
 			return NewGCmd(pieces, addr)
 		case 'h', 'H':

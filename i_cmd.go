@@ -51,20 +51,14 @@ func (c *i_cmd) String() string {
 }
 
 func (c *i_cmd) processLine(s *Sed) (bool, os.Error) {
-	b := bytes.NewBuffer(nil)
-	b.Write(c.text)
-	b.Write(s.patternSpace)
-	s.patternSpace = b.Bytes()
+  fmt.Fprint(os.Stdout, string(c.text))
 	return false, nil
 }
 
-func NewICmd(s *Sed, pieces [][]byte, addr *address) (*i_cmd, os.Error) {
-	if len(pieces) != 2 {
-		return nil, WrongNumberOfCommandParameters
-	}
+func NewICmd(s *Sed, line []byte, addr *address) (*i_cmd, os.Error) {
 	cmd := new(i_cmd)
 	cmd.addr = addr
-	cmd.text = pieces[1]
+	cmd.text = line[1:]
 	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
 		cmd.text = cmd.text[0 : len(cmd.text)-1]
 		line, err := s.getNextScriptLine()
