@@ -1,5 +1,5 @@
 //
-//  a_cmd.go
+//  b_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -31,48 +31,35 @@ import (
 	"os"
 )
 
-type a_cmd struct {
+type b_cmd struct {
 	addr	*address
-	text	[]byte
+	label string;
 }
 
-func (c *a_cmd) match(line []byte, lineNumber int) bool {
+func (c *b_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *a_cmd) String() string {
+func (c *b_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{Append Cmd addr:%v text:%s}", c.addr, c.text)
+			return fmt.Sprintf("{Branch to label: %s Cmd addr:%s}", c.label, c.addr.String())
 		}
-		return fmt.Sprintf("{Append Cmd text:%s}", c.text)
+		return fmt.Sprintf("{Branch to label: %s Cmd}", c.label)
 	}
-	return fmt.Sprintf("{Append Cmd}")
+	return fmt.Sprintf("{Branch Cmd}")
 }
 
-func (c *a_cmd) processLine(s *Sed) (bool, os.Error) {
-  fmt.Fprint(os.Stdout, string(c.text))
-	return false, nil
+func (c *b_cmd) processLine(s *Sed) (bool, os.Error) {
+	return true, NotImplemented
 }
 
-func NewACmd(s *Sed, pieces [][]byte, addr *address) (*a_cmd, os.Error) {
-	if len(pieces) != 2 {
+func NewBCmd(pieces [][]byte, addr *address) (*b_cmd, os.Error) {
+	if len(pieces) != 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	if addr != nil  && (addr.address_type == ADDRESS_RANGE || addr.address_type == ADDRESS_TO_END_OF_FILE) {
-		return nil, NoSupportForTwoAddress
-	}
-	cmd := new(a_cmd)
+	cmd := new(b_cmd)
 	cmd.addr = addr
-	cmd.text = pieces[1]
-	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
-		cmd.text = cmd.text[0 : len(cmd.text)-1]
-		line, err := s.getNextScriptLine()
-		if err != nil {
-			break
-		}
-		cmd.text = bytes.AddByte(cmd.text, '\n')
-		cmd.text = bytes.Add(cmd.text, line)
-	}
+	cmd.label = string(bytes.TrimSpace(pieces[0][1:]))
 	return cmd, nil
 }

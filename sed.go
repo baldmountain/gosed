@@ -70,6 +70,7 @@ type Sed struct {
 	inputFile		*os.File
 	input			*bufio.Reader
 	lineNumber		int
+	currentLine		string
 	commands		*vector.Vector
 	outputFile		*os.File
 	patternSpace, holdSpace	[]byte
@@ -183,6 +184,7 @@ func (s *Sed) process() {
 		if lineLength > 0 {
 			s.patternSpace = s.patternSpace[0 : lineLength-1]
 		}
+	  s.currentLine = string(s.patternSpace)
 		// track line number starting with line 1
 		s.lineNumber++
 		stop := false
@@ -192,7 +194,9 @@ func (s *Sed) process() {
 				var err os.Error
 				stop, err = c.(Cmd).processLine(s)
 				if err != nil {
-					fmt.Printf("%v\n", err)
+					fmt.Fprintf(os.Stderr, "Error: %s\n", err.String())
+					fmt.Fprintf(os.Stderr, "Line: %d:%s\n", s.lineNumber, s.currentLine)
+					fmt.Fprintf(os.Stderr, "Command: %s\n", c.(Cmd).String())
 					os.Exit(-1)
 				}
 				if stop {

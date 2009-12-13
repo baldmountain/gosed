@@ -36,6 +36,7 @@ GOFILES=\
 	sed.go \
 	cmd.go \
 	a_cmd.go \
+	b_cmd.go \
 	d_cmd.go \
 	eql_cmd.go \
 	g_cmd.go \

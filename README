@@ -6,3 +6,7 @@ I mainly put this up as sample code for others to read. Probably not good
 sample code, but it is something.
 
 I decided on the MIT open source license. See LICENSE for more information.
+
+The sed.html documentation is copyright The Open Group and I lifted it from
+their site. I used it as a specification and this version implements it.
+(Mostly.)

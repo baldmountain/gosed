@@ -39,6 +39,8 @@ var (
 	InvalidSCommandFlag		os.Error	= os.ErrorString("Invalid flag for s command")
 	RegularExpressionExpected	os.Error	= os.ErrorString("Expected a regular expression, got zero length string")
 	UnterminatedRegularExpression	os.Error	= os.ErrorString("Unterminated regular expression")
+	NoSupportForTwoAddress	os.Error	= os.ErrorString("This command doesn't support an address range or to end of file")
+	NotImplemented	os.Error	= os.ErrorString("This command command hasn't been implemented yet")
 )
 
 type Cmd interface {
@@ -59,6 +61,7 @@ const (
 )
 
 type address struct {
+  not bool
 	address_type	int
 	rangeStart	int
 	rangeEnd	int
@@ -90,23 +93,27 @@ func (a *address) String() string {
 }
 
 func (a *address) match(line []byte, lineNumber int) bool {
+  val := true
 	if a != nil {
 		switch a.address_type {
 		case ADDRESS_LINE:
-			return lineNumber == a.rangeStart
+			val = lineNumber == a.rangeStart
 		case ADDRESS_RANGE:
-			return lineNumber >= a.rangeStart && lineNumber <= a.rangeEnd
+			val = lineNumber >= a.rangeStart && lineNumber <= a.rangeEnd
 		case ADDRESS_TO_END_OF_FILE:
-			return lineNumber >= a.rangeStart
+			val = lineNumber >= a.rangeStart
 		case ADDRESS_LAST_LINE:
-			return false	// this is wrong!
+			val = false	// this is wrong!
 		case ADDRESS_REGEX:
-			return a.regex.Match(line)
+			val = a.regex.Match(line)
 		default:
-			return false
+			val = false
+		}
+		if a.not {
+		  val = !val
 		}
 	}
-	return true
+	return val
 }
 
 func getNumberFromLine(s []byte) ([]byte, int, os.Error) {
@@ -171,9 +178,18 @@ func checkForAddress(s []byte) ([]byte, *address, os.Error) {
 				if err != nil {
 					return s, nil, err
 				}
+				// if end range is less than start only match single line
+				if addr.rangeEnd < addr.rangeStart {
+      		addr.address_type = ADDRESS_LINE
+      		addr.rangeEnd = 0;
+				}
 			} else {
 				addr.address_type = ADDRESS_TO_END_OF_FILE
 			}
+		}
+		if s[0] == '!' {
+			addr.not = true
+			s = s[1:]
 		}
 		return s, addr, nil
 	}
@@ -207,6 +223,8 @@ func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
 			return NewEqlCmd(pieces, addr)
 		case 'a':
 			return NewACmd(s, pieces, addr)
+		case 'b':
+			return NewBCmd(pieces, addr)
 		case 'i':
 			return NewICmd(s, pieces, addr)
 		case 'g', 'G':

@@ -23,6 +23,6 @@ with another line\
 and one more.
 
 1,7i/:
-1,7=
+1,7!=
 
 6D
