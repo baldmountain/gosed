@@ -42,7 +42,7 @@ import (
 
 const (
 	versionMajor	= 0
-	versionMinor	= 1
+	versionMinor	= 2
 	versionPoint	= 0
 )
 

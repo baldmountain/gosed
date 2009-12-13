@@ -65,6 +65,9 @@ package: _obj/$(TARG).a
 fmt:
 	gofmt -oldprinter=false -oldparser=false -w *.go
 
+install:
+	cp gosed ${HOME}/bin/
+
 
 # create a Go package file (.a)
 _obj/$(TARG).a: _go_.$O

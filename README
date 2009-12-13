@@ -1,6 +1,6 @@
 This is my Go language learning project. It's a basic implementation of the
-utility sed. I'm not really looking for criticism, but if someone want to help
-out turning this int a real sed I wouldn't mind.
+utility sed. I'm not really looking for criticism, but if someone wants to
+help out turning this int a real sed I wouldn't mind.
 
 I mainly put this up as sample code for others to read. Probably not good
 sample code, but it is something.
@@ -10,3 +10,7 @@ I decided on the MIT open source license. See LICENSE for more information.
 The sed.html documentation is copyright The Open Group and I lifted it from
 their site. I used it as a specification and this version implements it.
 (Mostly.)
+
+For what is implemented gosed acts like sed. There is one major difference,
+gosed uses Go's regular expression library which is different from the one sed
+uses.
