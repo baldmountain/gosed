@@ -26,14 +26,14 @@
 package sed
 
 import (
-	"bytes";
-	"fmt";
-	"os";
+	"bytes"
+	"fmt"
+	"os"
 )
 
 type g_cmd struct {
-	addr	*address;
-	replace	bool;
+	addr	*address
+	replace	bool
 }
 
 func (c *g_cmd) match(line []byte, lineNumber int) bool {
@@ -48,27 +48,27 @@ func (c *g_cmd) String() string {
 			return fmt.Sprint("{Append a newline and the hold space to the pattern space Cmd addr:%v}", c.addr)
 		}
 	}
-	return fmt.Sprint("{Append/Replace pattern space with contents of hold space}");
+	return fmt.Sprint("{Append/Replace pattern space with contents of hold space}")
 }
 
 func (c *g_cmd) processLine(s *Sed) (bool, os.Error) {
 	if c.replace {
 		s.patternSpace = copyByteSlice(s.holdSpace)
 	} else {
-		s.patternSpace = bytes.AddByte(s.patternSpace, '\n');
-		s.patternSpace = bytes.Add(s.patternSpace, s.holdSpace);
+		s.patternSpace = bytes.AddByte(s.patternSpace, '\n')
+		s.patternSpace = bytes.Add(s.patternSpace, s.holdSpace)
 	}
-	return false, nil;
+	return false, nil
 }
 
 func NewGCmd(pieces [][]byte, addr *address) (*g_cmd, os.Error) {
 	if len(pieces) > 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(g_cmd);
+	cmd := new(g_cmd)
 	if pieces[0][0] == 'g' {
 		cmd.replace = true
 	}
-	cmd.addr = addr;
-	return cmd, nil;
+	cmd.addr = addr
+	return cmd, nil
 }

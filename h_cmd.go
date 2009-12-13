@@ -26,14 +26,14 @@
 package sed
 
 import (
-	"bytes";
-	"fmt";
-	"os";
+	"bytes"
+	"fmt"
+	"os"
 )
 
 type h_cmd struct {
-	addr	*address;
-	replace	bool;
+	addr	*address
+	replace	bool
 }
 
 func (c *h_cmd) match(line []byte, lineNumber int) bool {
@@ -48,27 +48,27 @@ func (c *h_cmd) String() string {
 			return fmt.Sprint("{Append a newline and the pattern space to the hold space Cmd addr:%v}", c.addr)
 		}
 	}
-	return fmt.Sprint("{Append/Replace hold space with contents of pattern space}");
+	return fmt.Sprint("{Append/Replace hold space with contents of pattern space}")
 }
 
 func (c *h_cmd) processLine(s *Sed) (bool, os.Error) {
 	if c.replace {
 		s.holdSpace = copyByteSlice(s.patternSpace)
 	} else {
-		s.holdSpace = bytes.AddByte(s.holdSpace, '\n');
-		s.holdSpace = bytes.Add(s.holdSpace, s.patternSpace);
+		s.holdSpace = bytes.AddByte(s.holdSpace, '\n')
+		s.holdSpace = bytes.Add(s.holdSpace, s.patternSpace)
 	}
-	return false, nil;
+	return false, nil
 }
 
 func NewHCmd(pieces [][]byte, addr *address) (*h_cmd, os.Error) {
 	if len(pieces) > 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(h_cmd);
+	cmd := new(h_cmd)
 	if pieces[0][0] == 'h' {
 		cmd.replace = true
 	}
-	cmd.addr = addr;
-	return cmd, nil;
+	cmd.addr = addr
+	return cmd, nil
 }

@@ -26,12 +26,12 @@
 package sed
 
 import (
-	"fmt";
-	"os";
+	"fmt"
+	"os"
 )
 
 type eql_cmd struct {
-	addr *address;
+	addr *address
 }
 
 func (c *eql_cmd) match(line []byte, lineNumber int) bool {
@@ -42,19 +42,19 @@ func (c *eql_cmd) String() string {
 	if c != nil && c.addr != nil {
 		return fmt.Sprint("{Output current line number}", c.addr)
 	}
-	return fmt.Sprint("{Output current line number Cmd}");
+	return fmt.Sprint("{Output current line number Cmd}")
 }
 
 func (c *eql_cmd) processLine(s *Sed) (bool, os.Error) {
 	fmt.Fprintf(os.Stdout, "%d\n", s.lineNumber)
-	return false, nil;
+	return false, nil
 }
 
 func NewEqlCmd(pieces [][]byte, addr *address) (*eql_cmd, os.Error) {
 	if len(pieces) > 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(eql_cmd);
-	cmd.addr = addr;
-	return cmd, nil;
+	cmd := new(eql_cmd)
+	cmd.addr = addr
+	return cmd, nil
 }

@@ -26,14 +26,14 @@
 package sed
 
 import (
-	"bytes";
-	"fmt";
-	"os";
+	"bytes"
+	"fmt"
+	"os"
 )
 
 type d_cmd struct {
-	addr			*address;
-	upToFirstNewLine	bool;
+	addr			*address
+	upToFirstNewLine	bool
 }
 
 func (c *d_cmd) match(line []byte, lineNumber int) bool {
@@ -44,28 +44,28 @@ func (c *d_cmd) String() string {
 	if c != nil && c.addr != nil {
 		return fmt.Sprintf("{Delete Cmd addr:%v}", c.addr)
 	}
-	return fmt.Sprintf("{Delete Cmd}");
+	return fmt.Sprintf("{Delete Cmd}")
 }
 
 func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {
 	if c.upToFirstNewLine {
-		idx := bytes.IndexByte(s.patternSpace, '\n');
+		idx := bytes.IndexByte(s.patternSpace, '\n')
 		if idx >= 0 && idx+1 < len(s.patternSpace) {
-			s.patternSpace = s.patternSpace[idx+1:];
-			return false, nil;
+			s.patternSpace = s.patternSpace[idx+1:]
+			return false, nil
 		}
 	}
-	return true, nil;
+	return true, nil
 }
 
 func NewDCmd(pieces [][]byte, addr *address) (*d_cmd, os.Error) {
 	if len(pieces) > 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(d_cmd);
+	cmd := new(d_cmd)
 	if pieces[0][0] == 'D' {
 		cmd.upToFirstNewLine = true
 	}
-	cmd.addr = addr;
-	return cmd, nil;
+	cmd.addr = addr
+	return cmd, nil
 }

@@ -26,12 +26,12 @@
 package sed
 
 import (
-	"fmt";
-	"os";
+	"fmt"
+	"os"
 )
 
 type n_cmd struct {
-	addr *address;
+	addr *address
 }
 
 func (c *n_cmd) match(line []byte, lineNumber int) bool {
@@ -42,21 +42,21 @@ func (c *n_cmd) String() string {
 	if c != nil && c.addr != nil {
 		return fmt.Sprint("{Output pattern space and get next line Cmd addr:%v}", c.addr)
 	}
-	return fmt.Sprint("{Output pattern space and get next line Cmd}");
+	return fmt.Sprint("{Output pattern space and get next line Cmd}")
 }
 
 func (c *n_cmd) processLine(s *Sed) (bool, os.Error) {
 	if !*quiet {
 		s.printPatternSpace()
 	}
-	return true, nil;
+	return true, nil
 }
 
 func NewNCmd(pieces [][]byte, addr *address) (*n_cmd, os.Error) {
 	if len(pieces) > 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(n_cmd);
-	cmd.addr = addr;
-	return cmd, nil;
+	cmd := new(n_cmd)
+	cmd.addr = addr
+	return cmd, nil
 }

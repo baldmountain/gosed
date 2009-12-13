@@ -26,23 +26,23 @@
 package sed
 
 import (
-	"bytes";
-	"fmt";
-	"os";
-	"regexp";
-	"strconv";
+	"bytes"
+	"fmt"
+	"os"
+	"regexp"
+	"strconv"
 )
 
 const (
-	global_replace = -1;
+	global_replace = -1
 )
 
 type s_cmd struct {
-	addr	*address;
-	regex	string;
-	replace	[]byte;
-	count	int;
-	re	*regexp.Regexp;
+	addr	*address
+	regex	string
+	replace	[]byte
+	count	int
+	re	*regexp.Regexp
 }
 
 func (c *s_cmd) match(line []byte, lineNumber int) bool {
@@ -54,9 +54,9 @@ func (c *s_cmd) String() string {
 		if c.addr != nil {
 			return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d addr:%v}", c.regex, c.replace, c.count, c.addr)
 		}
-		return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d}", c.regex, c.replace, c.count);
+		return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d}", c.regex, c.replace, c.count)
 	}
-	return "{Substitue Cmd}";
+	return "{Substitue Cmd}"
 }
 
 func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
@@ -64,26 +64,26 @@ func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
 		return nil, WrongNumberOfCommandParameters
 	}
 
-	err = nil;
-	c = new(s_cmd);
-	c.addr = addr;
+	err = nil
+	c = new(s_cmd)
+	c.addr = addr
 
-	c.regex = string(pieces[1]);
+	c.regex = string(pieces[1])
 	if len(c.regex) == 0 {
 		return nil, RegularExpressionExpected
 	}
-	c.re, err = regexp.Compile(string(c.regex));
+	c.re, err = regexp.Compile(string(c.regex))
 	if err != nil {
 		return nil, err
 	}
 
-	c.replace = pieces[2];
+	c.replace = pieces[2]
 
-	flag := string(pieces[3]);
+	flag := string(pieces[3])
 	if flag != "g" {
-		c.count = 1;
+		c.count = 1
 		if len(flag) > 0 {
-			c.count, err = strconv.Atoi(flag);
+			c.count, err = strconv.Atoi(flag)
 			if err != nil {
 				return nil, InvalidSCommandFlag
 			}
@@ -92,35 +92,35 @@ func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
 		c.count = global_replace
 	}
 
-	return c, err;
+	return c, err
 }
 
 func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
-	stop, err = false, nil;
+	stop, err = false, nil
 
 	switch c.count {
 	case global_replace:
 		s.patternSpace = c.re.ReplaceAll(s.patternSpace, c.replace)
 	default:
 		// a numeric flag command
-		count := c.count;
-		line := s.patternSpace;
-		s.patternSpace = make([]byte, 0);
+		count := c.count
+		line := s.patternSpace
+		s.patternSpace = make([]byte, 0)
 		for {
 			if count <= 0 {
-				s.patternSpace = bytes.Add(s.patternSpace, line);
-				return;
+				s.patternSpace = bytes.Add(s.patternSpace, line)
+				return
 			}
-			matches := c.re.Execute(line);
+			matches := c.re.Execute(line)
 			if len(matches) == 0 {
-				s.patternSpace = bytes.Add(s.patternSpace, line);
-				return;
+				s.patternSpace = bytes.Add(s.patternSpace, line)
+				return
 			}
-			s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]]);
-			s.patternSpace = bytes.Add(s.patternSpace, c.replace);
-			line = line[matches[1]:];
-			count--;
+			s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]])
+			s.patternSpace = bytes.Add(s.patternSpace, c.replace)
+			line = line[matches[1]:]
+			count--
 		}
 	}
-	return stop, err;
+	return stop, err
 }

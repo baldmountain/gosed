@@ -62,7 +62,7 @@ clean:
 package: _obj/$(TARG).a
 
 fmt:
-	gofmt -w *.go
+	gofmt -oldprinter=false -oldparser=false -w *.go
 
 
 # create a Go package file (.a)

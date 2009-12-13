@@ -26,14 +26,14 @@
 package sed
 
 import (
-	"bytes";
-	"fmt";
-	"os";
+	"bytes"
+	"fmt"
+	"os"
 )
 
 type p_cmd struct {
-	addr		*address;
-	upToNewLine	bool;
+	addr		*address
+	upToNewLine	bool
 }
 
 func (c *p_cmd) match(line []byte, lineNumber int) bool {
@@ -44,26 +44,26 @@ func (c *p_cmd) String() string {
 	if c != nil && c.addr != nil {
 		return fmt.Sprintf("{Output pattern space Cmd addr:%v}", c.addr)
 	}
-	return fmt.Sprint("{Output pattern space Cmd}");
+	return fmt.Sprint("{Output pattern space Cmd}")
 }
 
 func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
 	// print output space
 	if c.upToNewLine {
-		firstLine := bytes.Split(s.patternSpace, []byte{'\n'}, 1)[0];
-		fmt.Fprintln(s.outputFile, string(firstLine));
+		firstLine := bytes.Split(s.patternSpace, []byte{'\n'}, 1)[0]
+		fmt.Fprintln(s.outputFile, string(firstLine))
 	} else {
 		fmt.Fprintln(s.outputFile, string(s.patternSpace))
 	}
-	return false, nil;
+	return false, nil
 }
 
 func NewPCmd(pieces [][]byte, addr *address) (*p_cmd, os.Error) {
 	if len(pieces) > 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(p_cmd);
-	cmd.addr = addr;
-	cmd.upToNewLine = pieces[0][0] == 'P';
-	return cmd, nil;
+	cmd := new(p_cmd)
+	cmd.addr = addr
+	cmd.upToNewLine = pieces[0][0] == 'P'
+	return cmd, nil
 }

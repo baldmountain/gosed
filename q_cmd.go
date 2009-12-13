@@ -26,14 +26,14 @@
 package sed
 
 import (
-	"fmt";
-	"os";
-	"strconv";
+	"fmt"
+	"os"
+	"strconv"
 )
 
 type q_cmd struct {
-	addr		*address;
-	exit_code	int;
+	addr		*address
+	exit_code	int
 }
 
 func (c *q_cmd) match(line []byte, lineNumber int) bool {
@@ -45,32 +45,32 @@ func (c *q_cmd) String() string {
 		if c.addr != nil {
 			return fmt.Sprintf("{Quit Cmd with exit code: %d addr:%v}", c.exit_code, c.addr)
 		}
-		return fmt.Sprintf("{Quit Cmd with exit code: %d}", c.exit_code);
+		return fmt.Sprintf("{Quit Cmd with exit code: %d}", c.exit_code)
 	}
-	return fmt.Sprint("{Quit Cmd}");
+	return fmt.Sprint("{Quit Cmd}")
 }
 
 func NewQCmd(pieces [][]byte, addr *address) (c *q_cmd, err os.Error) {
-	err = nil;
+	err = nil
 	switch len(pieces) {
 	case 2:
-		c = new(q_cmd);
-		c.addr = addr;
-		c.exit_code, err = strconv.Atoi(string(pieces[1]));
+		c = new(q_cmd)
+		c.addr = addr
+		c.exit_code, err = strconv.Atoi(string(pieces[1]))
 		if err != nil {
 			c = nil
 		}
 	case 1:
-		c = new(q_cmd);
-		c.addr = addr;
-		c.exit_code = 0;
+		c = new(q_cmd)
+		c.addr = addr
+		c.exit_code = 0
 	default:
 		c, err = nil, WrongNumberOfCommandParameters
 	}
-	return c, err;
+	return c, err
 }
 
 func (c *q_cmd) processLine(s *Sed) (stop bool, err os.Error) {
-	os.Exit(c.exit_code);
-	return false, nil;
+	os.Exit(c.exit_code)
+	return false, nil
 }

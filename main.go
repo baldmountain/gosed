@@ -26,7 +26,7 @@
 package main
 
 import (
-	"sed";
+	"sed"
 )
 
 func main()	{ sed.Main() }

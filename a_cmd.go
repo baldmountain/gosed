@@ -26,14 +26,14 @@
 package sed
 
 import (
-	"bytes";
-	"fmt";
-	"os";
+	"bytes"
+	"fmt"
+	"os"
 )
 
 type a_cmd struct {
-	addr	*address;
-	text	[]byte;
+	addr	*address
+	text	[]byte
 }
 
 func (c *a_cmd) match(line []byte, lineNumber int) bool {
@@ -45,31 +45,31 @@ func (c *a_cmd) String() string {
 		if c.addr != nil {
 			return fmt.Sprintf("{Append Cmd addr:%v text:%s}", c.addr, c.text)
 		}
-		return fmt.Sprintf("{Append Cmd text:%s}", c.text);
+		return fmt.Sprintf("{Append Cmd text:%s}", c.text)
 	}
-	return fmt.Sprintf("{Append Cmd}");
+	return fmt.Sprintf("{Append Cmd}")
 }
 
 func (c *a_cmd) processLine(s *Sed) (bool, os.Error) {
-	s.patternSpace = bytes.Add(s.patternSpace, c.text);
-	return false, nil;
+	s.patternSpace = bytes.Add(s.patternSpace, c.text)
+	return false, nil
 }
 
 func NewACmd(s *Sed, pieces [][]byte, addr *address) (*a_cmd, os.Error) {
 	if len(pieces) != 2 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(a_cmd);
-	cmd.addr = addr;
-	cmd.text = pieces[1];
+	cmd := new(a_cmd)
+	cmd.addr = addr
+	cmd.text = pieces[1]
 	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
-		cmd.text = cmd.text[0 : len(cmd.text)-1];
-		line, err := s.getNextScriptLine();
+		cmd.text = cmd.text[0 : len(cmd.text)-1]
+		line, err := s.getNextScriptLine()
 		if err != nil {
 			break
 		}
-		cmd.text = bytes.AddByte(cmd.text, '\n');
-		cmd.text = bytes.Add(cmd.text, line);
+		cmd.text = bytes.AddByte(cmd.text, '\n')
+		cmd.text = bytes.Add(cmd.text, line)
 	}
-	return cmd, nil;
+	return cmd, nil
 }
