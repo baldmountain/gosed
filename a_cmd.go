@@ -43,7 +43,7 @@ func (c *a_cmd) match(line []byte, lineNumber int) bool {
 func (c *a_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{Append Cmd addr:%v text:%s}", c.addr, c.text)
+			return fmt.Sprintf("{Append Cmd addr:%s text:%s}", c.addr.String(), c.text)
 		}
 		return fmt.Sprintf("{Append Cmd text:%s}", c.text)
 	}
