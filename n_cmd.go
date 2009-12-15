@@ -40,7 +40,7 @@ func (c *n_cmd) match(line []byte, lineNumber int) bool {
 
 func (c *n_cmd) String() string {
 	if c != nil && c.addr != nil {
-		return fmt.Sprint("{Output pattern space and get next line Cmd addr:%v}", c.addr)
+		return fmt.Sprint("{Output pattern space and get next line Cmd addr:%s}", c.addr.String())
 	}
 	return fmt.Sprint("{Output pattern space and get next line Cmd}")
 }

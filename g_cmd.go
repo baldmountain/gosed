@@ -41,11 +41,19 @@ func (c *g_cmd) match(line []byte, lineNumber int) bool {
 }
 
 func (c *g_cmd) String() string {
-	if c != nil && c.addr != nil {
-		if c.replace {
-			return fmt.Sprint("{Replace pattern space with contents of hold space Cmd addr:%v}", c.addr)
+	if c != nil {
+		if c.addr != nil {
+			if c.replace {
+				return fmt.Sprint("{Replace pattern space with contents of hold space Cmd addr:%s}", c.addr.String())
+			} else {
+				return fmt.Sprint("{Append a newline and the hold space to the pattern space Cmd addr:%s}", c.addr.String())
+			}
 		} else {
-			return fmt.Sprint("{Append a newline and the hold space to the pattern space Cmd addr:%v}", c.addr)
+			if c.replace {
+				return fmt.Sprint("{Replace pattern space with contents of hold space}")
+			} else {
+				return fmt.Sprint("{Append a newline and the hold space to the pattern space}")
+			}
 		}
 	}
 	return fmt.Sprint("{Append/Replace pattern space with contents of hold space}")

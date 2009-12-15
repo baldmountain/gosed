@@ -51,12 +51,11 @@ func (c *a_cmd) String() string {
 }
 
 func (c *a_cmd) processLine(s *Sed) (bool, os.Error) {
-  fmt.Fprint(os.Stdout, string(c.text))
-	return true, nil
+	return false, nil
 }
 
 func NewACmd(s *Sed, line []byte, addr *address) (*a_cmd, os.Error) {
-	if addr != nil  && (addr.address_type == ADDRESS_RANGE || addr.address_type == ADDRESS_TO_END_OF_FILE) {
+	if addr != nil && (addr.address_type == ADDRESS_RANGE || addr.address_type == ADDRESS_TO_END_OF_FILE) {
 		return nil, NoSupportForTwoAddress
 	}
 	cmd := new(a_cmd)

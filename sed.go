@@ -196,6 +196,15 @@ func (s *Sed) process() {
 		// track line number starting with line 1
 		s.lineNumber++
 		stop := false
+		// process i commands
+		for c := range s.commands.Iter() {
+			// ask the sed if we should process this command, based on address
+			if cmd, ok := c.(*i_cmd); ok {
+  			if c.(Address).match(s.patternSpace, s.lineNumber) {
+  			  fmt.Fprintf(s.outputFile, "%s\n", cmd.text)
+  		  }
+			}
+	  }
 		for c := range s.commands.Iter() {
 			// ask the sed if we should process this command, based on address
 			if c.(Address).match(s.patternSpace, s.lineNumber) {
@@ -215,6 +224,15 @@ func (s *Sed) process() {
 		if !*quiet && !stop {
 			s.printPatternSpace()
 		}
+		// process a commands
+		for c := range s.commands.Iter() {
+			// ask the sed if we should process this command, based on address
+			if cmd, ok := c.(*a_cmd); ok {
+  			if c.(Address).match(s.patternSpace, s.lineNumber) {
+  			  fmt.Fprintf(s.outputFile, "%s\n", cmd.text)
+  		  }
+			}
+	  }
 		s.patternSpace, err = s.input.ReadSlice('\n')
 	}
 }

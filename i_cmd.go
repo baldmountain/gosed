@@ -43,15 +43,14 @@ func (c *i_cmd) match(line []byte, lineNumber int) bool {
 func (c *i_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{Insert Cmd addr:%v text:%s}", c.addr, c.text)
+			return fmt.Sprintf("{Insert Cmd addr:%s text:%s}", c.addr.String(), string(c.text))
 		}
-		return fmt.Sprintf("{Insert Cmd text:%s}", c.text)
+		return fmt.Sprintf("{Insert Cmd text:%s}", string(c.text))
 	}
 	return fmt.Sprintf("{Insert Cmd}")
 }
 
 func (c *i_cmd) processLine(s *Sed) (bool, os.Error) {
-  fmt.Fprint(os.Stdout, string(c.text))
 	return false, nil
 }
 

@@ -42,7 +42,7 @@ func (c *p_cmd) match(line []byte, lineNumber int) bool {
 
 func (c *p_cmd) String() string {
 	if c != nil && c.addr != nil {
-		return fmt.Sprintf("{Output pattern space Cmd addr:%v}", c.addr)
+		return fmt.Sprintf("{Output pattern space Cmd addr:%s}", c.addr.String())
 	}
 	return fmt.Sprint("{Output pattern space Cmd}")
 }

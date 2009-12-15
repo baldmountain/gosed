@@ -42,7 +42,7 @@ func (c *d_cmd) match(line []byte, lineNumber int) bool {
 
 func (c *d_cmd) String() string {
 	if c != nil && c.addr != nil {
-		return fmt.Sprintf("{Delete Cmd addr:%v}", c.addr)
+		return fmt.Sprintf("{Delete Cmd addr:%s}", c.addr.String())
 	}
 	return fmt.Sprintf("{Delete Cmd}")
 }

@@ -52,9 +52,9 @@ func (c *s_cmd) match(line []byte, lineNumber int) bool {
 func (c *s_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d addr:%v}", c.regex, c.replace, c.count, c.addr)
+			return fmt.Sprintf("{Substitue Cmd addr:%s regex:%v replace:%s count:%d}", c.addr, c.regex, c.replace, c.count)
 		}
-		return fmt.Sprintf("{Substitue Cmd regex:%s replace:%s count:%d}", c.regex, c.replace, c.count)
+		return fmt.Sprintf("{Substitue Cmd regex:%v replace:%s count:%d}", c.regex, c.replace, c.count)
 	}
 	return "{Substitue Cmd}"
 }
