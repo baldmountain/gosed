@@ -158,12 +158,12 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 			os.Exit(-1)
 		}
 		if _, ok := c.(*i_cmd); ok {
-  		s.beforeCommands.Push(c)
+			s.beforeCommands.Push(c)
 		} else if _, ok := c.(*a_cmd); ok {
-  		s.afterCommands.Push(c)
-	  } else {
-  		s.commands.Push(c)
-	  }
+			s.afterCommands.Push(c)
+		} else {
+			s.commands.Push(c)
+		}
 	}
 	return nil
 }
@@ -210,11 +210,11 @@ func (s *Sed) process() {
 		for c := range s.beforeCommands.Iter() {
 			// ask the sed if we should process this command, based on address
 			if cmd, ok := c.(*i_cmd); ok {
-  			if c.(Address).match(s.patternSpace, s.lineNumber) {
-  			  fmt.Fprintf(s.outputFile, "%s\n", cmd.text)
-  		  }
+				if c.(Address).match(s.patternSpace, s.lineNumber) {
+					fmt.Fprintf(s.outputFile, "%s\n", cmd.text)
+				}
 			}
-	  }
+		}
 		for c := range s.commands.Iter() {
 			// ask the sed if we should process this command, based on address
 			if c.(Address).match(s.patternSpace, s.lineNumber) {
@@ -238,11 +238,11 @@ func (s *Sed) process() {
 		for c := range s.afterCommands.Iter() {
 			// ask the sed if we should process this command, based on address
 			if cmd, ok := c.(*a_cmd); ok {
-  			if c.(Address).match(s.patternSpace, s.lineNumber) {
-  			  fmt.Fprintf(s.outputFile, "%s\n", cmd.text)
-  		  }
+				if c.(Address).match(s.patternSpace, s.lineNumber) {
+					fmt.Fprintf(s.outputFile, "%s\n", cmd.text)
+				}
 			}
-	  }
+		}
 		s.patternSpace, err = s.input.ReadSlice('\n')
 	}
 }

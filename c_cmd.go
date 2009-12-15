@@ -50,21 +50,29 @@ func (c *c_cmd) String() string {
 	return fmt.Sprintf("{Append Cmd}")
 }
 
+func (c *c_cmd) printText(s *Sed) {
+	// we are going to get the newline from the
+	fmt.Fprint(s.outputFile, string(c.text))
+}
+
 func (c *c_cmd) processLine(s *Sed) (bool, os.Error) {
   s.patternSpace = s.patternSpace[0:0]
 	if c.addr != nil {
 	  switch c.addr.address_type {
 	    case ADDRESS_RANGE:
-  	    if s.lineNumber == c.addr.rangeEnd {
-    	    fmt.Fprint(s.outputFile, string(c.text))
+  	    if s.lineNumber+1 == c.addr.rangeEnd {
+					c.printText(s);
+					return true, nil
   	    }
 	    case ADDRESS_LINE, ADDRESS_REGEX, ADDRESS_LAST_LINE:
-	      fmt.Fprint(s.outputFile, string(c.text))
+				c.printText(s);
+				return true, nil
 	    case ADDRESS_TO_END_OF_FILE:
 	      // FIX need to output at end of file
     }
 	} else {
-	  fmt.Fprintf(s.outputFile, "%s\n", string(c.text))
+		c.printText(s);
+		return true, nil
 	}
 	return false, nil
 }

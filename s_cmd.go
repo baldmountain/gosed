@@ -5,7 +5,7 @@
 // Copyright (c) 2009 Geoffrey Clements
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
+// of this software and associated documentation files (the "nthOccuranceSoftware"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
@@ -41,7 +41,7 @@ type s_cmd struct {
 	addr	*address
 	regex	string
 	replace	[]byte
-	count	int
+	nthOccurance	int
 	re	*regexp.Regexp
 }
 
@@ -52,9 +52,9 @@ func (c *s_cmd) match(line []byte, lineNumber int) bool {
 func (c *s_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{Substitue Cmd addr:%s regex:%v replace:%s count:%d}", c.addr, c.regex, c.replace, c.count)
+			return fmt.Sprintf("{Substitue Cmd addr:%s regex:%v replace:%s nth occurance:%d}", c.addr, c.regex, c.replace, c.nthOccurance)
 		}
-		return fmt.Sprintf("{Substitue Cmd regex:%v replace:%s count:%d}", c.regex, c.replace, c.count)
+		return fmt.Sprintf("{Substitue Cmd regex:%v replace:%s nth occurance:%d}", c.regex, c.replace, c.nthOccurance)
 	}
 	return "{Substitue Cmd}"
 }
@@ -81,15 +81,15 @@ func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
 
 	flag := string(pieces[3])
 	if flag != "g" {
-		c.count = 1
+		c.nthOccurance = 1
 		if len(flag) > 0 {
-			c.count, err = strconv.Atoi(flag)
+			c.nthOccurance, err = strconv.Atoi(flag)
 			if err != nil {
 				return nil, InvalidSCommandFlag
 			}
 		}
 	} else {
-		c.count = global_replace
+		c.nthOccurance = global_replace
 	}
 
 	return c, err
@@ -98,28 +98,27 @@ func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
 func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
 	stop, err = false, nil
 
-	switch c.count {
+	switch c.nthOccurance {
 	case global_replace:
 		s.patternSpace = c.re.ReplaceAll(s.patternSpace, c.replace)
 	default:
 		// a numeric flag command
-		count := c.count
+		count := 0
 		line := s.patternSpace
-		s.patternSpace = make([]byte, 0)
 		for {
-			if count <= 0 {
-				s.patternSpace = bytes.Add(s.patternSpace, line)
-				return
-			}
 			matches := c.re.Execute(line)
-			if len(matches) == 0 {
-				s.patternSpace = bytes.Add(s.patternSpace, line)
-				return
+			if len(matches) > 0 {
+				count++
+				if count == c.nthOccurance {
+					s.patternSpace = make([]byte, 0)
+					s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]])
+					s.patternSpace = bytes.Add(s.patternSpace, c.replace)
+					s.patternSpace = bytes.Add(s.patternSpace, line[matches[1]:])
+					break
+				}
+			} else {
+				break
 			}
-			s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]])
-			s.patternSpace = bytes.Add(s.patternSpace, c.replace)
-			line = line[matches[1]:]
-			count--
 		}
 	}
 	return stop, err
