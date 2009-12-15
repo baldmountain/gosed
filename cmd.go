@@ -223,6 +223,8 @@ func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
 			return NewACmd(s, line, addr)
 		case 'b':
 			return NewBCmd(bytes.Split(line, []byte{'/'}, 0), addr)
+		case 'c':
+			return NewCCmd(s, line, addr)
 		case 'i':
 			return NewICmd(s, line, addr)
 		case 'g', 'G':

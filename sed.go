@@ -58,7 +58,7 @@ var quiet = flag.Bool("n", false, "Don't print the pattern space at the end of e
 var script = flag.String("e", "", "The script used to process the input file.")
 var script_file = flag.String("f", "", "Specify a file to read as the script. Ignored if -e present")
 var edit_inplace = flag.Bool("i", false, "This option specifies that files are to be edited in-place. Otherwise output is printed to stdout.")
-var line_wrap = flag.Uint("l", 70, "Specify the default line-wrap length for the l command. A length of 0 (zero) means to never wrap long lines. If not specified, it is taken to be 70.")
+var line_wrap = flag.Uint("l", 0, "Specify the default line-wrap length for the l command. A length of 0 (zero) means to never wrap long lines. If not specified, it is taken to be 70.")
 var unbuffered = flag.Bool("u", false, "Buffer both input and output as minimally as practical. (ignored)")
 var treat_files_as_seperate = flag.Bool("s", false, "Treat files as searate entites. Line numbers reset to 1 for each file")
 
@@ -71,7 +71,9 @@ type Sed struct {
 	input			*bufio.Reader
 	lineNumber		int
 	currentLine		string
+	beforeCommands		*vector.Vector
 	commands		*vector.Vector
+	afterCommands		*vector.Vector
 	outputFile		*os.File
 	patternSpace, holdSpace	[]byte
 	scriptLines		[][]byte
@@ -79,7 +81,9 @@ type Sed struct {
 }
 
 func (s *Sed) Init() {
+	s.beforeCommands = new(vector.Vector)
 	s.commands = new(vector.Vector)
+	s.afterCommands = new(vector.Vector)
 	s.outputFile = os.Stdout
 	s.patternSpace = make([]byte, 0)
 	s.holdSpace = make([]byte, 0)
@@ -153,7 +157,13 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 			fmt.Printf("Script error: %s -> %d: %s\n", err.String(), s.scriptLineNumber, line)
 			os.Exit(-1)
 		}
-		s.commands.Push(c)
+		if _, ok := c.(*i_cmd); ok {
+  		s.beforeCommands.Push(c)
+		} else if _, ok := c.(*a_cmd); ok {
+  		s.afterCommands.Push(c)
+	  } else {
+  		s.commands.Push(c)
+	  }
 	}
 	return nil
 }
@@ -197,7 +207,7 @@ func (s *Sed) process() {
 		s.lineNumber++
 		stop := false
 		// process i commands
-		for c := range s.commands.Iter() {
+		for c := range s.beforeCommands.Iter() {
 			// ask the sed if we should process this command, based on address
 			if cmd, ok := c.(*i_cmd); ok {
   			if c.(Address).match(s.patternSpace, s.lineNumber) {
@@ -225,7 +235,7 @@ func (s *Sed) process() {
 			s.printPatternSpace()
 		}
 		// process a commands
-		for c := range s.commands.Iter() {
+		for c := range s.afterCommands.Iter() {
 			// ask the sed if we should process this command, based on address
 			if cmd, ok := c.(*a_cmd); ok {
   			if c.(Address).match(s.patternSpace, s.lineNumber) {
