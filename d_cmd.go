@@ -42,9 +42,9 @@ func (c *d_cmd) match(line []byte, lineNumber int) bool {
 
 func (c *d_cmd) String() string {
 	if c != nil && c.addr != nil {
-		return fmt.Sprintf("{Delete Cmd addr:%s}", c.addr.String())
+		return fmt.Sprintf("{d command addr:%s}", c.addr.String())
 	}
-	return fmt.Sprintf("{Delete Cmd}")
+	return fmt.Sprintf("{d command}")
 }
 
 func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {

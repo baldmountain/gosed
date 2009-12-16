@@ -40,9 +40,9 @@ func (c *eql_cmd) match(line []byte, lineNumber int) bool {
 
 func (c *eql_cmd) String() string {
 	if c != nil && c.addr != nil {
-		return fmt.Sprintf("{Output current line number addr: %s}", c.addr.String())
+		return fmt.Sprintf("{= command addr: %s}", c.addr.String())
 	}
-	return fmt.Sprint("{Output current line number Cmd}")
+	return fmt.Sprint("{= command}")
 }
 
 func (c *eql_cmd) processLine(s *Sed) (bool, os.Error) {

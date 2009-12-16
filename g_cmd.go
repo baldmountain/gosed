@@ -44,13 +44,13 @@ func (c *g_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
 			if c.replace {
-				return fmt.Sprint("{Replace pattern space with contents of hold space Cmd addr:%s}", c.addr.String())
+				return fmt.Sprint("{g command with replace addr:%s}", c.addr.String())
 			} else {
-				return fmt.Sprint("{Append a newline and the hold space to the pattern space Cmd addr:%s}", c.addr.String())
+				return fmt.Sprint("{g command addr:%s}", c.addr.String())
 			}
 		} else {
 			if c.replace {
-				return fmt.Sprint("{Replace pattern space with contents of hold space}")
+				return fmt.Sprint("{g command with replace}")
 			} else {
 				return fmt.Sprint("{Append a newline and the hold space to the pattern space}")
 			}
