@@ -46,6 +46,7 @@ GOFILES=\
 	n_cmd.go \
 	p_cmd.go \
 	q_cmd.go \
+	r_cmd.go \
 	s_cmd.go
 
 # test files for this package
