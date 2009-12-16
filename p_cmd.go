@@ -42,9 +42,9 @@ func (c *p_cmd) match(line []byte, lineNumber int) bool {
 
 func (c *p_cmd) String() string {
 	if c != nil && c.addr != nil {
-		return fmt.Sprintf("{Output pattern space Cmd addr:%s}", c.addr.String())
+		return fmt.Sprintf("{p command addr:%s}", c.addr.String())
 	}
-	return fmt.Sprint("{Output pattern space Cmd}")
+	return fmt.Sprint("{p command}")
 }
 
 func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
