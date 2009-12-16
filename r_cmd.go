@@ -31,8 +31,8 @@ import (
 )
 
 type r_cmd struct {
-	addr		*address
-	text []byte
+	addr	*address
+	text	[]byte
 }
 
 func (c *r_cmd) match(line []byte, lineNumber int) bool {
@@ -55,13 +55,13 @@ func (c *r_cmd) processLine(s *Sed) (bool, os.Error) {
 }
 
 func NewRCmd(line []byte, addr *address) (*r_cmd, os.Error) {
-  line = line[1:]
+	line = line[1:]
 	cmd := new(r_cmd)
 	cmd.addr = addr
 	if len(line) > 0 {
-  	// cmd.text = 
+		// cmd.text =
 	} else {
-	  cmd.text = nil
+		cmd.text = nil
 	}
 	return cmd, nil
 }

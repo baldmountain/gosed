@@ -118,7 +118,7 @@ func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
 				} else {
 					s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]+1])
 				}
-  			line = line[matches[0]+1:]
+				line = line[matches[0]+1:]
 			} else {
 				s.patternSpace = bytes.Add(s.patternSpace, line)
 				break
