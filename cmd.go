@@ -207,30 +207,32 @@ func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
 
 	if len(line) > 0 {
 		switch line[0] {
-		case 's':
-			return NewSCmd(bytes.Split(line, []byte{'/'}, 0), addr)
-		case 'q':
-			return NewQCmd(bytes.Split(line, []byte{'/'}, 0), addr)
-		case 'd', 'D':
-			return NewDCmd(bytes.Split(line, []byte{'/'}, 0), addr)
-		case 'P', 'p':
-			return NewPCmd(bytes.Split(line, []byte{'/'}, 0), addr)
-		case 'n':
-			return NewNCmd(bytes.Split(line, []byte{'/'}, 0), addr)
-		case '=':
-			return NewEqlCmd(bytes.Split(line, []byte{'/'}, 0), addr)
 		case 'a':
 			return NewACmd(s, line, addr)
 		case 'b':
 			return NewBCmd(bytes.Split(line, []byte{'/'}, 0), addr)
 		case 'c':
 			return NewCCmd(s, line, addr)
-		case 'i':
-			return NewICmd(s, line, addr)
+		case 'd', 'D':
+			return NewDCmd(bytes.Split(line, []byte{'/'}, 0), addr)
 		case 'g', 'G':
 			return NewGCmd(bytes.Split(line, []byte{'/'}, 0), addr)
 		case 'h', 'H':
 			return NewHCmd(bytes.Split(line, []byte{'/'}, 0), addr)
+		case 'i':
+			return NewICmd(s, line, addr)
+		case 'n':
+			return NewNCmd(bytes.Split(line, []byte{'/'}, 0), addr)
+		case 'P', 'p':
+			return NewPCmd(bytes.Split(line, []byte{'/'}, 0), addr)
+		case 'q':
+			return NewQCmd(bytes.Split(line, []byte{'/'}, 0), addr)
+		case 'r':
+			return NewQCmd(bytes.Split(line, []byte{'/'}, 0), addr)
+		case 's':
+			return NewSCmd(bytes.Split(line, []byte{'/'}, 0), addr)
+		case '=':
+			return NewEqlCmd(bytes.Split(line, []byte{'/'}, 0), addr)
 		}
 	}
 
