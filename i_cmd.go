@@ -43,11 +43,11 @@ func (c *i_cmd) match(line []byte, lineNumber int) bool {
 func (c *i_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{Insert Cmd addr:%s text:%s}", c.addr.String(), string(c.text))
+			return fmt.Sprintf("{i command addr:%s text:%s}", c.addr.String(), string(c.text))
 		}
-		return fmt.Sprintf("{Insert Cmd text:%s}", string(c.text))
+		return fmt.Sprintf("{i command text:%s}", string(c.text))
 	}
-	return fmt.Sprintf("{Insert Cmd}")
+	return fmt.Sprintf("{i command}")
 }
 
 func (c *i_cmd) processLine(s *Sed) (bool, os.Error) {
@@ -64,7 +64,7 @@ func NewICmd(s *Sed, line []byte, addr *address) (*i_cmd, os.Error) {
 		if err != nil {
 			break
 		}
-		cmd.text = bytes.AddByte(cmd.text, '\n')
+		// cmd.text = bytes.AddByte(cmd.text, '\n')
 		cmd.text = bytes.Add(cmd.text, line)
 	}
 	return cmd, nil
