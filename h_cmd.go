@@ -44,20 +44,19 @@ func (c *h_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
 			if c.replace {
-				return fmt.Sprint("{Replace hold space with contents of pattern space Cmd addr:%s}", c.addr.String())
+				return fmt.Sprint("{h command with replace addr:%s}", c.addr.String())
 			} else {
-				return fmt.Sprint("{Append a newline and the pattern space to the hold space Cmd addr:%s}", c.addr.String())
+				return fmt.Sprint("{h command Cmd addr:%s}", c.addr.String())
 			}
 		} else {
 			if c.replace {
-				return fmt.Sprint("{Replace hold space with contents of pattern space Cmd}")
+				return fmt.Sprint("{h command with replace }")
 			} else {
-				return fmt.Sprint("{Append a newline and the pattern space to the hold space Cmd")
+				return fmt.Sprint("{h command")
 			}
 		}
 	}
-
-	return fmt.Sprint("{Append/Replace hold space with contents of pattern space}")
+	return fmt.Sprint("{h command}")
 }
 
 func (c *h_cmd) processLine(s *Sed) (bool, os.Error) {
