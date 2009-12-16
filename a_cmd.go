@@ -43,11 +43,11 @@ func (c *a_cmd) match(line []byte, lineNumber int) bool {
 func (c *a_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{Append Cmd addr:%s text:%s}", c.addr.String(), c.text)
+			return fmt.Sprintf("{a command addr:%s text:%s}", c.addr.String(), c.text)
 		}
-		return fmt.Sprintf("{Append Cmd text:%s}", c.text)
+		return fmt.Sprintf("{a command text:%s}", c.text)
 	}
-	return fmt.Sprintf("{Append Cmd}")
+	return fmt.Sprintf("{a command}")
 }
 
 func (c *a_cmd) processLine(s *Sed) (bool, os.Error) {
@@ -67,5 +67,6 @@ func NewACmd(s *Sed, line []byte, addr *address) (*a_cmd, os.Error) {
 		cmd.text = bytes.AddByte(cmd.text, '\n')
 		cmd.text = bytes.Add(cmd.text, line)
 	}
+	cmd.text = trimSpaceFromBeginning(cmd.text)
 	return cmd, nil
 }
