@@ -211,7 +211,7 @@ func (s *Sed) process() {
 			// ask the sed if we should process this command, based on address
 			if cmd, ok := c.(*i_cmd); ok {
 				if c.(Address).match(s.patternSpace, s.lineNumber) {
-					fmt.Fprintf(s.outputFile, "%s\n", cmd.text)
+					s.outputFile.Write(cmd.text)
 				}
 			}
 		}
