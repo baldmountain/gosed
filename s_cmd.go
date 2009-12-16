@@ -38,11 +38,11 @@ const (
 )
 
 type s_cmd struct {
-	addr	*address
-	regex	string
-	replace	[]byte
+	addr		*address
+	regex		string
+	replace		[]byte
 	nthOccurance	int
-	re	*regexp.Regexp
+	re		*regexp.Regexp
 }
 
 func (c *s_cmd) match(line []byte, lineNumber int) bool {
@@ -52,11 +52,11 @@ func (c *s_cmd) match(line []byte, lineNumber int) bool {
 func (c *s_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{Substitue Cmd addr:%s regex:%v replace:%s nth occurance:%d}", c.addr, c.regex, c.replace, c.nthOccurance)
+			return fmt.Sprintf("{s command addr:%s regex:%v replace:%s nth occurance:%d}", c.addr, c.regex, c.replace, c.nthOccurance)
 		}
-		return fmt.Sprintf("{Substitue Cmd regex:%v replace:%s nth occurance:%d}", c.regex, c.replace, c.nthOccurance)
+		return fmt.Sprintf("{s command regex:%v replace:%s nth occurance:%d}", c.regex, c.replace, c.nthOccurance)
 	}
-	return "{Substitue Cmd}"
+	return "{s command}"
 }
 
 func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
@@ -105,18 +105,22 @@ func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
 		// a numeric flag command
 		count := 0
 		line := s.patternSpace
+		s.patternSpace = make([]byte, 0)
 		for {
 			matches := c.re.Execute(line)
 			if len(matches) > 0 {
 				count++
 				if count == c.nthOccurance {
-					s.patternSpace = make([]byte, 0)
 					s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]])
 					s.patternSpace = bytes.Add(s.patternSpace, c.replace)
 					s.patternSpace = bytes.Add(s.patternSpace, line[matches[1]:])
 					break
+				} else {
+					s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]+1])
 				}
+  			line = line[matches[0]+1:]
 			} else {
+				s.patternSpace = bytes.Add(s.patternSpace, line)
 				break
 			}
 		}
