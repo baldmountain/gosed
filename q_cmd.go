@@ -43,11 +43,11 @@ func (c *q_cmd) match(line []byte, lineNumber int) bool {
 func (c *q_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{Quit Cmd addr:%s with exit code: %d}", c.addr.String(), c.exit_code)
+			return fmt.Sprintf("{q command addr:%s with exit code: %d}", c.addr.String(), c.exit_code)
 		}
-		return fmt.Sprintf("{Quit Cmd with exit code: %d}", c.exit_code)
+		return fmt.Sprintf("{q command with exit code: %d}", c.exit_code)
 	}
-	return fmt.Sprint("{Quit Cmd}")
+	return fmt.Sprint("{q command}")
 }
 
 func NewQCmd(pieces [][]byte, addr *address) (c *q_cmd, err os.Error) {
