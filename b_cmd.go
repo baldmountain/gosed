@@ -43,11 +43,11 @@ func (c *b_cmd) match(line []byte, lineNumber int) bool {
 func (c *b_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{Branch to label: %s Cmd addr:%s}", c.label, c.addr.String())
+			return fmt.Sprintf("{b command label: %s Cmd addr:%s}", c.label, c.addr.String())
 		}
-		return fmt.Sprintf("{Branch to label: %s Cmd}", c.label)
+		return fmt.Sprintf("{b command label: %s Cmd}", c.label)
 	}
-	return fmt.Sprintf("{Branch Cmd}")
+	return fmt.Sprintf("{b command}")
 }
 
 func (c *b_cmd) processLine(s *Sed) (bool, os.Error) {
