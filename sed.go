@@ -41,9 +41,9 @@ import (
 )
 
 const (
-	versionMajor	= 0
-	versionMinor	= 2
-	versionPoint	= 0
+	versionMajor = 0
+	versionMinor = 2
+	versionPoint = 0
 )
 
 var versionString string
@@ -67,17 +67,17 @@ var usageShown bool = false
 var newLine = []byte{'\n'}
 
 type Sed struct {
-	inputFile		*os.File
-	input			*bufio.Reader
-	lineNumber		int
-	currentLine		string
-	beforeCommands		*vector.Vector
-	commands		*vector.Vector
-	afterCommands		*vector.Vector
-	outputFile		*os.File
-	patternSpace, holdSpace	[]byte
-	scriptLines		[][]byte
-	scriptLineNumber	int
+	inputFile               *os.File
+	input                   *bufio.Reader
+	lineNumber              int
+	currentLine             string
+	beforeCommands          *vector.Vector
+	commands                *vector.Vector
+	afterCommands           *vector.Vector
+	outputFile              *os.File
+	patternSpace, holdSpace []byte
+	scriptLines             [][]byte
+	scriptLineNumber        int
 }
 
 func (s *Sed) Init() {

@@ -65,7 +65,7 @@ clean:
 package: _obj/$(TARG).a
 
 fmt:
-	gofmt -oldprinter=false -oldparser=false -w *.go
+	gofmt -w *.go
 
 install:
 	cp gosed ${HOME}/bin/

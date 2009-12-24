@@ -32,8 +32,8 @@ import (
 )
 
 type q_cmd struct {
-	addr		*address
-	exit_code	int
+	addr      *address
+	exit_code int
 }
 
 func (c *q_cmd) match(line []byte, lineNumber int) bool {

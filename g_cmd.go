@@ -32,8 +32,8 @@ import (
 )
 
 type g_cmd struct {
-	addr	*address
-	replace	bool
+	addr    *address
+	replace bool
 }
 
 func (c *g_cmd) match(line []byte, lineNumber int) bool {

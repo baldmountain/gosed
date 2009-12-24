@@ -29,4 +29,4 @@ import (
 	"sed"
 )
 
-func main()	{ sed.Main() }
+func main() { sed.Main() }

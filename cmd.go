@@ -34,13 +34,13 @@ import (
 )
 
 var (
-	WrongNumberOfCommandParameters	os.Error	= os.ErrorString("Wrong number of parameters for command")
-	UnknownScriptCommand		os.Error	= os.ErrorString("Unknown script command")
-	InvalidSCommandFlag		os.Error	= os.ErrorString("Invalid flag for s command")
-	RegularExpressionExpected	os.Error	= os.ErrorString("Expected a regular expression, got zero length string")
-	UnterminatedRegularExpression	os.Error	= os.ErrorString("Unterminated regular expression")
-	NoSupportForTwoAddress		os.Error	= os.ErrorString("This command doesn't support an address range or to end of file")
-	NotImplemented			os.Error	= os.ErrorString("This command command hasn't been implemented yet")
+	WrongNumberOfCommandParameters os.Error = os.ErrorString("Wrong number of parameters for command")
+	UnknownScriptCommand           os.Error = os.ErrorString("Unknown script command")
+	InvalidSCommandFlag            os.Error = os.ErrorString("Invalid flag for s command")
+	RegularExpressionExpected      os.Error = os.ErrorString("Expected a regular expression, got zero length string")
+	UnterminatedRegularExpression  os.Error = os.ErrorString("Unterminated regular expression")
+	NoSupportForTwoAddress         os.Error = os.ErrorString("This command doesn't support an address range or to end of file")
+	NotImplemented                 os.Error = os.ErrorString("This command command hasn't been implemented yet")
 )
 
 type Cmd interface {
@@ -53,7 +53,7 @@ type Address interface {
 }
 
 const (
-	ADDRESS_LINE	= iota
+	ADDRESS_LINE = iota
 	ADDRESS_RANGE
 	ADDRESS_TO_END_OF_FILE
 	ADDRESS_LAST_LINE
@@ -61,11 +61,11 @@ const (
 )
 
 type address struct {
-	not		bool
-	address_type	int
-	rangeStart	int
-	rangeEnd	int
-	regex		*regexp.Regexp
+	not          bool
+	address_type int
+	rangeStart   int
+	rangeEnd     int
+	regex        *regexp.Regexp
 }
 
 func (a *address) getTypeAsString() string {
@@ -103,7 +103,7 @@ func (a *address) match(line []byte, lineNumber int) bool {
 		case ADDRESS_TO_END_OF_FILE:
 			val = lineNumber >= a.rangeStart
 		case ADDRESS_LAST_LINE:
-			val = false	// this is wrong!
+			val = false // this is wrong!
 		case ADDRESS_REGEX:
 			val = a.regex.Match(line)
 		default:

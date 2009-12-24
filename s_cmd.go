@@ -38,11 +38,11 @@ const (
 )
 
 type s_cmd struct {
-	addr		*address
-	regex		string
-	replace		[]byte
-	nthOccurance	int
-	re		*regexp.Regexp
+	addr         *address
+	regex        string
+	replace      []byte
+	nthOccurance int
+	re           *regexp.Regexp
 }
 
 func (c *s_cmd) match(line []byte, lineNumber int) bool {

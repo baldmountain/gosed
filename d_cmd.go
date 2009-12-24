@@ -32,8 +32,8 @@ import (
 )
 
 type d_cmd struct {
-	addr			*address
-	upToFirstNewLine	bool
+	addr             *address
+	upToFirstNewLine bool
 }
 
 func (c *d_cmd) match(line []byte, lineNumber int) bool {
