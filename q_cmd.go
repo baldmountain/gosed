@@ -52,6 +52,7 @@ func (c *q_cmd) String() string {
 
 func NewQCmd(pieces [][]byte, addr *address) (c *q_cmd, err os.Error) {
 	err = nil
+	c = nil
 	switch len(pieces) {
 	case 2:
 		c = new(q_cmd)

@@ -59,7 +59,7 @@ func NewRCmd(line []byte, addr *address) (*r_cmd, os.Error) {
 	cmd := new(r_cmd)
 	cmd.addr = addr
 	if len(line) > 0 {
-		// cmd.text =
+		cmd.text = line
 	} else {
 		cmd.text = nil
 	}

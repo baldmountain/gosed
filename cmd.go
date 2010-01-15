@@ -228,7 +228,7 @@ func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
 		case 'q':
 			return NewQCmd(bytes.Split(line, []byte{'/'}, 0), addr)
 		case 'r':
-			return NewQCmd(bytes.Split(line, []byte{'/'}, 0), addr)
+			return NewRCmd(line, addr)
 		case 's':
 			return NewSCmd(bytes.Split(line, []byte{'/'}, 0), addr)
 		case '=':

@@ -30,10 +30,10 @@ import (
 )
 
 func TestNewCmd(t *testing.T) {
-	pieces := []byte{'4', 'r', '5', 'o', '/', '0', '/', 'g'}
+	pieces := []byte{'4', 'x', '5', 'o', '/', '0', '/', 'g'}
 	c, err := NewCmd(nil, pieces)
 	if c != nil {
-		t.Error("2: Got a command when we shouldn't have " + c.String())
+		t.Error("1: Got a command when we shouldn't have " + c.String())
 	}
 	if err == nil {
 		t.Error("Didn't get an error we expected")
@@ -47,7 +47,7 @@ func TestNewCmd(t *testing.T) {
 	sc := c.(*s_cmd)
 	if sc == nil {
 		t.Error("Didn't get a command that we expected")
-	} else if sc.regex != "o" && len(sc.replace) == 1 && sc.replace[0] == '0' && sc.count == -1 {
+	} else if sc.regex != "o" && len(sc.replace) == 1 && sc.replace[0] == '0' && sc.nthOccurance == -1 {
 		t.Error("We didn't get the s command we expected")
 	} else if err != nil {
 		t.Error("Got an error we didn't expect: " + err.String())
@@ -59,7 +59,7 @@ func TestNewDCmd(t *testing.T) {
 	c, err := NewCmd(nil, pieces)
 	dc := c.(*d_cmd)
 	if dc != nil {
-		t.Error("1: Got a command when we shouldn't have " + c.String())
+		t.Error("2: Got a command when we shouldn't have " + c.String())
 	}
 	if err == nil {
 		t.Error("Didn't get an error we expected")
@@ -71,7 +71,7 @@ func TestNewDCmd(t *testing.T) {
 	c, err = NewCmd(nil, pieces)
 	dc = c.(*d_cmd)
 	if dc != nil {
-		t.Error("2: Got a command when we shouldn't have " + c.String())
+		t.Error("3: Got a command when we shouldn't have " + c.String())
 	}
 	if err == nil {
 		t.Error("Didn't get an error we expected")
@@ -112,7 +112,7 @@ func TestNewNCmd(t *testing.T) {
 	c, err := NewCmd(nil, pieces)
 	nc := c.(*n_cmd)
 	if nc != nil {
-		t.Error("1: Got a command when we shouldn't have " + c.String())
+		t.Error("4: Got a command when we shouldn't have " + c.String())
 	}
 	if err == nil {
 		t.Error("Didn't get an error we expected")
@@ -127,7 +127,7 @@ func TestNewNCmd(t *testing.T) {
 	c, err = NewCmd(nil, pieces)
 	nc = c.(*n_cmd)
 	if nc != nil {
-		t.Error("2: Got a command when we shouldn't have " + c.String())
+		t.Error("5: Got a command when we shouldn't have " + c.String())
 	}
 	if err == nil {
 		t.Error("Didn't get an error we expected")
@@ -168,7 +168,7 @@ func TestNewPCmd(t *testing.T) {
 	c, err := NewCmd(nil, pieces)
 	pc := c.(*p_cmd)
 	if pc != nil {
-		t.Error("1: Got a command when we shouldn't have " + c.String())
+		t.Error("6: Got a command when we shouldn't have " + c.String())
 	}
 	if err == nil {
 		t.Error("Didn't get an error we expected")
@@ -183,7 +183,7 @@ func TestNewPCmd(t *testing.T) {
 	c, err = NewCmd(nil, pieces)
 	pc = c.(*p_cmd)
 	if pc != nil {
-		t.Error("2: Got a command when we shouldn't have " + c.String())
+		t.Error("7: Got a command when we shouldn't have " + c.String())
 	}
 	if err == nil {
 		t.Error("Didn't get an error we expected")
@@ -223,9 +223,6 @@ func TestNewQCmd(t *testing.T) {
 	pieces := []byte{'q', '/', 'o', '/', '0', '/', 'g'}
 	c, err := NewCmd(nil, pieces)
 	qc := c.(*q_cmd)
-	if qc != nil {
-		t.Error("1: Got a command when we shouldn't have " + c.String())
-	}
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
@@ -236,7 +233,7 @@ func TestNewQCmd(t *testing.T) {
 	c, err = NewCmd(nil, pieces)
 	qc = c.(*q_cmd)
 	if qc != nil {
-		t.Error("2: Got a command when we shouldn't have " + c.String())
+		t.Error("9: Got a command when we shouldn't have " + c.String())
 	}
 	if err == nil {
 		t.Error("Didn't get an error we expected")
