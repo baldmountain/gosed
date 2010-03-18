@@ -35,7 +35,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
-	"strings"
 	"unicode"
 	"utf8"
 )
@@ -275,7 +274,11 @@ func Main() {
 			}
 			scriptBuffer = sb
 		} else if flag.NArg() > 1 {
-			scriptBuffer = strings.Bytes(flag.Arg(0))
+			scriptBuffer := make([]byte, len(flag.Arg(0)))
+			for i := 0; i < len(flag.Arg(0)); i++ {
+				scriptBuffer[i] = flag.Arg(0)[i]
+			}
+
 			// change semicoluns to newlines for scripts on command line
 			idx := bytes.IndexByte(scriptBuffer, ';')
 			for idx >= 0 {
@@ -287,7 +290,10 @@ func Main() {
 			currentFileParameter++
 		}
 	} else {
-		scriptBuffer = strings.Bytes(*script)
+		scriptBuffer := make([]byte, len(*script))
+		for i := 0; i < len(*script); i++ {
+			scriptBuffer[i] = (*script)[i]
+		}
 		// change semicoluns to newlines for scripts on command line
 		idx := bytes.IndexByte(scriptBuffer, ';')
 		for idx >= 0 {
