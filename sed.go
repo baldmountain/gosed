@@ -28,7 +28,7 @@ package sed
 import (
 	"bufio"
 	"bytes"
-	"container/vector"
+	"container/list"
 	"flag"
 	"fmt"
 	"io"
@@ -70,9 +70,9 @@ type Sed struct {
 	input                   *bufio.Reader
 	lineNumber              int
 	currentLine             string
-	beforeCommands          *vector.Vector
-	commands                *vector.Vector
-	afterCommands           *vector.Vector
+	beforeCommands          *list.List
+	commands                *list.List
+	afterCommands           *list.List
 	outputFile              *os.File
 	patternSpace, holdSpace []byte
 	scriptLines             [][]byte
@@ -80,9 +80,9 @@ type Sed struct {
 }
 
 func (s *Sed) Init() {
-	s.beforeCommands = new(vector.Vector)
-	s.commands = new(vector.Vector)
-	s.afterCommands = new(vector.Vector)
+	s.beforeCommands = new(list.List)
+	s.commands = new(list.List)
+	s.afterCommands = new(list.List)
 	s.outputFile = os.Stdout
 	s.patternSpace = make([]byte, 0)
 	s.holdSpace = make([]byte, 0)
@@ -157,11 +157,11 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 			os.Exit(-1)
 		}
 		if _, ok := c.(*i_cmd); ok {
-			s.beforeCommands.Push(c)
+			s.beforeCommands.PushBack(c)
 		} else if _, ok := c.(*a_cmd); ok {
-			s.afterCommands.Push(c)
+			s.afterCommands.PushBack(c)
 		} else {
-			s.commands.Push(c)
+			s.commands.PushBack(c)
 		}
 	}
 	return nil
