@@ -157,10 +157,13 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 			os.Exit(-1)
 		}
 		if _, ok := c.(*i_cmd); ok {
+  		fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
 			s.beforeCommands.PushBack(c)
 		} else if _, ok := c.(*a_cmd); ok {
+  		fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
 			s.afterCommands.PushBack(c)
 		} else {
+  		fmt.Fprintf(os.Stdout, "cmd %s\n\n", c.String())
 			s.commands.PushBack(c)
 		}
 	}
@@ -184,7 +187,7 @@ func (s *Sed) printLine(line []byte) {
 }
 
 func (s *Sed) printPatternSpace() {
-	lines := bytes.Split(s.patternSpace, newLine, 0)
+	lines := bytes.Split(s.patternSpace, newLine, -1)
 	for _, line := range lines {
 		s.printLine(line)
 	}
@@ -217,6 +220,7 @@ func (s *Sed) process() {
 		for c := range s.commands.Iter() {
 			// ask the sed if we should process this command, based on address
 			if c.(Address).match(s.patternSpace, s.lineNumber) {
+				fmt.Fprintf(os.Stderr, "match\n")
 				var err os.Error
 				stop, err = c.(Cmd).processLine(s)
 				if err != nil {
