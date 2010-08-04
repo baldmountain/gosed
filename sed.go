@@ -132,7 +132,7 @@ func trimSpaceFromBeginning(s []byte) []byte {
 
 func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 	// a script may be a single command or it may be several
-	s.scriptLines = bytes.Split(scriptBuffer, []byte{'\n'}, 0)
+	s.scriptLines = bytes.Split(scriptBuffer, []byte{'\n'}, -1)
 	s.scriptLineNumber = 0
 	var line []byte
 	var serr os.Error
@@ -157,13 +157,10 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 			os.Exit(-1)
 		}
 		if _, ok := c.(*i_cmd); ok {
-  		fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
 			s.beforeCommands.PushBack(c)
 		} else if _, ok := c.(*a_cmd); ok {
-  		fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
 			s.afterCommands.PushBack(c)
 		} else {
-  		fmt.Fprintf(os.Stdout, "cmd %s\n\n", c.String())
 			s.commands.PushBack(c)
 		}
 	}
@@ -220,7 +217,6 @@ func (s *Sed) process() {
 		for c := range s.commands.Iter() {
 			// ask the sed if we should process this command, based on address
 			if c.(Address).match(s.patternSpace, s.lineNumber) {
-				fmt.Fprintf(os.Stderr, "match\n")
 				var err os.Error
 				stop, err = c.(Cmd).processLine(s)
 				if err != nil {
@@ -316,7 +312,7 @@ func Main() {
 
 	// parse script
 	s.parseScript(scriptBuffer)
-
+	
 	if currentFileParameter >= flag.NArg() {
 		if *edit_inplace {
 			fmt.Fprintf(os.Stderr, "Warning: Option -i ignored\n")
@@ -366,7 +362,7 @@ func Main() {
 					os.Exit(-1)
 				}
 				// reopen input file
-				s.inputFile, err = os.Open(inputFilename, os.O_WRONLY|os.O_TRUNC, int(dir.Mode))
+				s.inputFile, err = os.Open(inputFilename, os.O_WRONLY|os.O_TRUNC, dir.Mode)
 				if err != nil {
 					fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s\n", err.String())
 					// os.Remove(tempFilename);
