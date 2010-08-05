@@ -42,7 +42,7 @@ import (
 const (
 	versionMajor = 0
 	versionMinor = 2
-	versionPoint = 0
+	versionPoint = 1
 )
 
 var versionString string
@@ -252,7 +252,7 @@ func Main() {
 	s.Init()
 	flag.Parse()
 	if *show_version {
-		fmt.Fprintf(os.Stdout, "Version: %s (c)2009 Geoffrey Clements All Rights Reserved\n\n", versionString)
+		fmt.Fprintf(os.Stdout, "Version: %s (c)2009-2010 Geoffrey Clements All Rights Reserved\n\n", versionString)
 	}
 	if *show_help {
 		usage()
