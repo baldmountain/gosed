@@ -107,7 +107,7 @@ func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
 		line := s.patternSpace
 		s.patternSpace = make([]byte, 0)
 		for {
-			matches := c.re.Execute(line)
+			matches := c.re.FindIndex(line)
 			if len(matches) > 0 {
 				count++
 				if count == c.nthOccurance {
