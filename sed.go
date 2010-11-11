@@ -206,23 +206,23 @@ func (s *Sed) process() {
 		s.lineNumber++
 		stop := false
 		// process i commands
-		for c := range s.beforeCommands.Iter() {
+  	for c := s.beforeCommands.Front(); c != nil; c = c.Next() {
 			// ask the sed if we should process this command, based on address
-			if cmd, ok := c.(*i_cmd); ok {
-				if c.(Address).match(s.patternSpace, s.lineNumber) {
+			if cmd, ok := c.Value.(*i_cmd); ok {
+				if c.Value.(Address).match(s.patternSpace, s.lineNumber) {
 					s.outputFile.Write(cmd.text)
 				}
 			}
 		}
-		for c := range s.commands.Iter() {
+		for c := s.commands.Front(); c != nil; c = c.Next() {
 			// ask the sed if we should process this command, based on address
-			if c.(Address).match(s.patternSpace, s.lineNumber) {
+			if c.Value.(Address).match(s.patternSpace, s.lineNumber) {
 				var err os.Error
-				stop, err = c.(Cmd).processLine(s)
+				stop, err = c.Value.(Cmd).processLine(s)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error: %s\n", err.String())
 					fmt.Fprintf(os.Stderr, "Line: %d:%s\n", s.lineNumber, s.currentLine)
-					fmt.Fprintf(os.Stderr, "Command: %s\n", c.(Cmd).String())
+					fmt.Fprintf(os.Stderr, "Command: %s\n", c.Value.(Cmd).String())
 					os.Exit(-1)
 				}
 				if stop {
@@ -234,10 +234,10 @@ func (s *Sed) process() {
 			s.printPatternSpace()
 		}
 		// process a commands
-		for c := range s.afterCommands.Iter() {
+		for c := s.afterCommands.Front(); c != nil; c = c.Next() {
 			// ask the sed if we should process this command, based on address
-			if cmd, ok := c.(*a_cmd); ok {
-				if c.(Address).match(s.patternSpace, s.lineNumber) {
+			if cmd, ok := c.Value.(*a_cmd); ok {
+				if c.Value.(Address).match(s.patternSpace, s.lineNumber) {
 					fmt.Fprintf(s.outputFile, "%s\n", cmd.text)
 				}
 			}
