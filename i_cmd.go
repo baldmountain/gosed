@@ -65,7 +65,9 @@ func NewICmd(s *Sed, line []byte, addr *address) (*i_cmd, os.Error) {
 			break
 		}
 		// cmd.text = bytes.AddByte(cmd.text, '\n')
-		cmd.text = bytes.Add(cmd.text, line)
+		buf := bytes.NewBuffer(cmd.text)
+		buf.Write(line)
+		s.patternSpace = buf.Bytes()
 	}
 	return cmd, nil
 }

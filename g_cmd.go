@@ -63,8 +63,10 @@ func (c *g_cmd) processLine(s *Sed) (bool, os.Error) {
 	if c.replace {
 		s.patternSpace = copyByteSlice(s.holdSpace)
 	} else {
-		s.patternSpace = bytes.AddByte(s.patternSpace, '\n')
-		s.patternSpace = bytes.Add(s.patternSpace, s.holdSpace)
+		buf := bytes.NewBuffer(s.patternSpace)
+		buf.WriteRune('\n')
+		buf.Write(s.holdSpace)
+		s.patternSpace = buf.Bytes()
 	}
 	return false, nil
 }

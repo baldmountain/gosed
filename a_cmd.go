@@ -64,8 +64,10 @@ func NewACmd(s *Sed, line []byte, addr *address) (*a_cmd, os.Error) {
 		if err != nil {
 			break
 		}
-		cmd.text = bytes.AddByte(cmd.text, '\n')
-		cmd.text = bytes.Add(cmd.text, line)
+		buf := bytes.NewBuffer(cmd.text)
+		buf.WriteRune('\n')
+		buf.Write(line)
+		cmd.text = buf.Bytes()
 	}
 	cmd.text = trimSpaceFromBeginning(cmd.text)
 	return cmd, nil

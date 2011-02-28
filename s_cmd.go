@@ -111,16 +111,22 @@ func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
 			if len(matches) > 0 {
 				count++
 				if count == c.nthOccurance {
-					s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]])
-					s.patternSpace = bytes.Add(s.patternSpace, c.replace)
-					s.patternSpace = bytes.Add(s.patternSpace, line[matches[1]:])
+      		buf := bytes.NewBuffer(s.patternSpace)
+      		buf.Write(line[0:matches[0]])
+      		buf.Write(c.replace)
+      		buf.Write(line[matches[1]:])
+      		s.patternSpace = buf.Bytes()
 					break
 				} else {
-					s.patternSpace = bytes.Add(s.patternSpace, line[0:matches[0]+1])
+      		buf := bytes.NewBuffer(s.patternSpace)
+      		buf.Write(line[0:matches[0]+1])
+      		s.patternSpace = buf.Bytes()
 				}
 				line = line[matches[0]+1:]
 			} else {
-				s.patternSpace = bytes.Add(s.patternSpace, line)
+    		buf := bytes.NewBuffer(s.patternSpace)
+    		buf.Write(line)
+    		s.patternSpace = buf.Bytes()
 				break
 			}
 		}

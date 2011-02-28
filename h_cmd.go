@@ -63,8 +63,10 @@ func (c *h_cmd) processLine(s *Sed) (bool, os.Error) {
 	if c.replace {
 		s.holdSpace = copyByteSlice(s.patternSpace)
 	} else {
-		s.holdSpace = bytes.AddByte(s.holdSpace, '\n')
-		s.holdSpace = bytes.Add(s.holdSpace, s.patternSpace)
+		buf := bytes.NewBuffer(s.patternSpace)
+		buf.WriteRune('\n')
+		buf.Write(s.holdSpace)
+		s.patternSpace = buf.Bytes()
 	}
 	return false, nil
 }
