@@ -19,7 +19,7 @@ and one more.\
 s/[Ll]ine/form/g
 s/s/5/g
 #$/q/-1
-#/O[RF]/s/O/0h/g
+/O[RF]/s/O/0h/g
 
 6iInsert text\
 with another line\

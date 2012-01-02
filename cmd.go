@@ -34,13 +34,13 @@ import (
 )
 
 var (
-	WrongNumberOfCommandParameters os.Error = os.ErrorString("Wrong number of parameters for command")
-	UnknownScriptCommand           os.Error = os.ErrorString("Unknown script command")
-	InvalidSCommandFlag            os.Error = os.ErrorString("Invalid flag for s command")
-	RegularExpressionExpected      os.Error = os.ErrorString("Expected a regular expression, got zero length string")
-	UnterminatedRegularExpression  os.Error = os.ErrorString("Unterminated regular expression")
-	NoSupportForTwoAddress         os.Error = os.ErrorString("This command doesn't support an address range or to end of file")
-	NotImplemented                 os.Error = os.ErrorString("This command command hasn't been implemented yet")
+	WrongNumberOfCommandParameters os.Error = os.NewError("Wrong number of parameters for command")
+	UnknownScriptCommand           os.Error = os.NewError("Unknown script command")
+	InvalidSCommandFlag            os.Error = os.NewError("Invalid flag for s command")
+	RegularExpressionExpected      os.Error = os.NewError("Expected a regular expression, got zero length string")
+	UnterminatedRegularExpression  os.Error = os.NewError("Unterminated regular expression")
+	NoSupportForTwoAddress         os.Error = os.NewError("This command doesn't support an address range or to end of file")
+	NotImplemented                 os.Error = os.NewError("This command command hasn't been implemented yet")
 )
 
 type Cmd interface {
@@ -210,29 +210,29 @@ func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
 		case 'a':
 			return NewACmd(s, line, addr)
 		case 'b':
-			return NewBCmd(bytes.Split(line, []byte{'/'}, -1), addr)
+			return NewBCmd(bytes.Split(line, []byte{'/'}), addr)
 		case 'c':
 			return NewCCmd(s, line, addr)
 		case 'd', 'D':
-			return NewDCmd(bytes.Split(line, []byte{'/'}, -1), addr)
+			return NewDCmd(bytes.Split(line, []byte{'/'}), addr)
 		case 'g', 'G':
-			return NewGCmd(bytes.Split(line, []byte{'/'}, -1), addr)
+			return NewGCmd(bytes.Split(line, []byte{'/'}), addr)
 		case 'h', 'H':
-			return NewHCmd(bytes.Split(line, []byte{'/'}, -1), addr)
+			return NewHCmd(bytes.Split(line, []byte{'/'}), addr)
 		case 'i':
 			return NewICmd(s, line, addr)
 		case 'n':
-			return NewNCmd(bytes.Split(line, []byte{'/'}, -1), addr)
+			return NewNCmd(bytes.Split(line, []byte{'/'}), addr)
 		case 'P', 'p':
-			return NewPCmd(bytes.Split(line, []byte{'/'}, -1), addr)
+			return NewPCmd(bytes.Split(line, []byte{'/'}), addr)
 		case 'q':
-			return NewQCmd(bytes.Split(line, []byte{'/'}, -1), addr)
+			return NewQCmd(bytes.Split(line, []byte{'/'}), addr)
 		case 'r':
 			return NewRCmd(line, addr)
 		case 's':
-			return NewSCmd(bytes.Split(line, []byte{'/'}, -1), addr)
+			return NewSCmd(bytes.Split(line, []byte{'/'}), addr)
 		case '=':
-			return NewEqlCmd(bytes.Split(line, []byte{'/'}, -1), addr)
+			return NewEqlCmd(bytes.Split(line, []byte{'/'}), addr)
 		}
 	}
 

@@ -132,7 +132,7 @@ func trimSpaceFromBeginning(s []byte) []byte {
 
 func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 	// a script may be a single command or it may be several
-	s.scriptLines = bytes.Split(scriptBuffer, []byte{'\n'}, -1)
+	s.scriptLines = bytes.Split(scriptBuffer, newLine)
 	s.scriptLineNumber = 0
 	var line []byte
 	var serr os.Error
@@ -184,7 +184,7 @@ func (s *Sed) printLine(line []byte) {
 }
 
 func (s *Sed) printPatternSpace() {
-	lines := bytes.Split(s.patternSpace, newLine, -1)
+	lines := bytes.Split(s.patternSpace, newLine)
 	for _, line := range lines {
 		s.printLine(line)
 	}
@@ -323,7 +323,7 @@ func Main() {
 		for ; currentFileParameter < flag.NArg(); currentFileParameter++ {
 			inputFilename = flag.Arg(currentFileParameter)
 			// actually do the processing
-			s.inputFile, err = os.Open(inputFilename, os.O_RDONLY, 0)
+			s.inputFile, err = os.Open(inputFilename)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error openint input file: %s.\n\n", inputFilename)
 				usage()
@@ -340,7 +340,7 @@ func Main() {
 					tempFilename = inputFilename + "-" + strconv.Itoa(tmpc) + ".tmp"
 					dir, _ = os.Stat(tempFilename)
 				}
-				f, err := os.Open(tempFilename, os.O_RDWR|os.O_TRUNC|os.O_CREAT, 0600)
+				f, err := os.Create(tempFilename)
 				if err != nil {
 					s.inputFile.Close()
 					fmt.Fprintf(os.Stderr, "Error opening temp file file for inplace editing: %s\n", err.String())
@@ -362,7 +362,7 @@ func Main() {
 					os.Exit(-1)
 				}
 				// reopen input file
-				s.inputFile, err = os.Open(inputFilename, os.O_WRONLY|os.O_TRUNC, dir.Mode)
+				s.inputFile, err = os.OpenFile(inputFilename, os.O_WRONLY|os.O_TRUNC, dir.Mode)
 				if err != nil {
 					fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s\n", err.String())
 					// os.Remove(tempFilename);
