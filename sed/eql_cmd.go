@@ -1,5 +1,5 @@
 //
-//  n_cmd.go
+//  eql_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -30,33 +30,31 @@ import (
 	"os"
 )
 
-type n_cmd struct {
+type eql_cmd struct {
 	addr *address
 }
 
-func (c *n_cmd) match(line []byte, lineNumber int) bool {
+func (c *eql_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *n_cmd) String() string {
+func (c *eql_cmd) String() string {
 	if c != nil && c.addr != nil {
-		return fmt.Sprint("{n command addr:%s}", c.addr.String())
+		return fmt.Sprintf("{= command addr: %s}", c.addr.String())
 	}
-	return fmt.Sprint("{n command}")
+	return fmt.Sprint("{= command}")
 }
 
-func (c *n_cmd) processLine(s *Sed) (bool, os.Error) {
-	if !*quiet {
-		s.printPatternSpace()
-	}
-	return true, nil
+func (c *eql_cmd) processLine(s *Sed) (bool, error) {
+	fmt.Fprintf(os.Stdout, "\n%d\n", s.lineNumber)
+	return false, nil
 }
 
-func NewNCmd(pieces [][]byte, addr *address) (*n_cmd, os.Error) {
+func NewEqlCmd(pieces [][]byte, addr *address) (*eql_cmd, error) {
 	if len(pieces) > 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(n_cmd)
+	cmd := new(eql_cmd)
 	cmd.addr = addr
 	return cmd, nil
 }

@@ -1,5 +1,5 @@
 //
-//  eql_cmd.go
+//  i_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -26,35 +26,47 @@
 package sed
 
 import (
+	"bytes"
 	"fmt"
-	"os"
 )
 
-type eql_cmd struct {
+type i_cmd struct {
 	addr *address
+	text []byte
 }
 
-func (c *eql_cmd) match(line []byte, lineNumber int) bool {
+func (c *i_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *eql_cmd) String() string {
-	if c != nil && c.addr != nil {
-		return fmt.Sprintf("{= command addr: %s}", c.addr.String())
+func (c *i_cmd) String() string {
+	if c != nil {
+		if c.addr != nil {
+			return fmt.Sprintf("{i command addr:%s text:%s}", c.addr.String(), string(c.text))
+		}
+		return fmt.Sprintf("{i command text:%s}", string(c.text))
 	}
-	return fmt.Sprint("{= command}")
+	return fmt.Sprintf("{i command}")
 }
 
-func (c *eql_cmd) processLine(s *Sed) (bool, os.Error) {
-	fmt.Fprintf(os.Stdout, "\n%d\n", s.lineNumber)
+func (c *i_cmd) processLine(s *Sed) (bool, error) {
 	return false, nil
 }
 
-func NewEqlCmd(pieces [][]byte, addr *address) (*eql_cmd, os.Error) {
-	if len(pieces) > 1 {
-		return nil, WrongNumberOfCommandParameters
-	}
-	cmd := new(eql_cmd)
+func NewICmd(s *Sed, line []byte, addr *address) (*i_cmd, error) {
+	cmd := new(i_cmd)
 	cmd.addr = addr
+	cmd.text = line[1:]
+	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
+		cmd.text = cmd.text[0 : len(cmd.text)-1]
+		line, err := s.getNextScriptLine()
+		if err != nil {
+			break
+		}
+		// cmd.text = bytes.AddByte(cmd.text, '\n')
+		buf := bytes.NewBuffer(cmd.text)
+		buf.Write(line)
+		s.patternSpace = buf.Bytes()
+	}
 	return cmd, nil
 }

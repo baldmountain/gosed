@@ -38,7 +38,7 @@ func TestNewCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected Unknown script command", "Unknown script command", err.String())
+		checkString(t, "Expected Unknown script command", "Unknown script command", err.Error())
 	}
 
 	// s
@@ -50,7 +50,7 @@ func TestNewCmd(t *testing.T) {
 	} else if sc.regex != "o" && len(sc.replace) == 1 && sc.replace[0] == '0' && sc.nthOccurance == -1 {
 		t.Error("We didn't get the s command we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 }
 
@@ -64,7 +64,7 @@ func TestNewDCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.Error())
 	}
 
 	pieces = []byte{'d', '/', 'd'}
@@ -76,7 +76,7 @@ func TestNewDCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.Error())
 	}
 
 	pieces = []byte{'d'}
@@ -85,7 +85,7 @@ func TestNewDCmd(t *testing.T) {
 	if dc == nil {
 		t.Error("Didn't get a d command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 
 	pieces = []byte{'$', 'd'}
@@ -94,7 +94,7 @@ func TestNewDCmd(t *testing.T) {
 	if dc == nil {
 		t.Error("Didn't get a d command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 
 	pieces = []byte{'4', '5', '7', 'd'}
@@ -103,7 +103,7 @@ func TestNewDCmd(t *testing.T) {
 	if dc == nil {
 		t.Error("Didn't get a d command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 }
 
@@ -120,7 +120,7 @@ func TestNewNCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.Error())
 	}
 
 	pieces = []byte{'n', '/', 'd'}
@@ -132,7 +132,7 @@ func TestNewNCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.Error())
 	}
 
 	pieces = []byte{'n'}
@@ -141,7 +141,7 @@ func TestNewNCmd(t *testing.T) {
 	if nc == nil {
 		t.Error("Didn't get a n command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 
 	pieces = []byte{'$', 'n'}
@@ -150,7 +150,7 @@ func TestNewNCmd(t *testing.T) {
 	if nc == nil {
 		t.Error("Didn't get a d command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 
 	pieces = []byte{'4', '5', '7', 'n'}
@@ -159,7 +159,7 @@ func TestNewNCmd(t *testing.T) {
 	if nc == nil {
 		t.Error("Didn't get a n command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 }
 
@@ -176,7 +176,7 @@ func TestNewPCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.Error())
 	}
 
 	pieces = []byte{'P', '/', 'd'}
@@ -188,7 +188,7 @@ func TestNewPCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.Error())
 	}
 
 	pieces = []byte{'P'}
@@ -197,7 +197,7 @@ func TestNewPCmd(t *testing.T) {
 	if pc == nil {
 		t.Error("Didn't get a p command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 
 	pieces = []byte{'$', 'P'}
@@ -206,7 +206,7 @@ func TestNewPCmd(t *testing.T) {
 	if pc == nil {
 		t.Error("Didn't get a p command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 
 	pieces = []byte{'4', '5', '7', 'P'}
@@ -215,7 +215,7 @@ func TestNewPCmd(t *testing.T) {
 	if pc == nil {
 		t.Error("Didn't get a p command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 }
 
@@ -226,7 +226,7 @@ func TestNewQCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.String())
+		checkString(t, "Expected: Wrong number of parameters for command", "Wrong number of parameters for command", err.Error())
 	}
 
 	pieces = []byte{'q', '/', 'q'}
@@ -238,7 +238,7 @@ func TestNewQCmd(t *testing.T) {
 	if err == nil {
 		t.Error("Didn't get an error we expected")
 	} else {
-		checkString(t, "Expected: parsing q: invalid argument", "parsing q: invalid argument", err.String())
+		checkString(t, "Expected: strconv.ParseInt: parsing \"q\": invalid syntax", "strconv.ParseInt: parsing \"q\": invalid syntax", err.Error())
 	}
 
 	pieces = []byte{'q'}
@@ -247,7 +247,7 @@ func TestNewQCmd(t *testing.T) {
 	if qc == nil {
 		t.Error("Didn't get a q command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 
 	pieces = []byte{'q', '/', '1'}
@@ -256,7 +256,7 @@ func TestNewQCmd(t *testing.T) {
 	if qc == nil {
 		t.Error("Didn't get a q command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 
 	pieces = []byte{'$', 'q'}
@@ -265,7 +265,7 @@ func TestNewQCmd(t *testing.T) {
 	if qc == nil {
 		t.Error("Didn't get a q command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 
 	pieces = []byte{'4', '5', '7', 'q'}
@@ -274,7 +274,7 @@ func TestNewQCmd(t *testing.T) {
 	if qc == nil {
 		t.Error("Didn't get a d command that we expected")
 	} else if err != nil {
-		t.Error("Got an error we didn't expect: " + err.String())
+		t.Error("Got an error we didn't expect: " + err.Error())
 	}
 }
 

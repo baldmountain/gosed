@@ -36,7 +36,7 @@ import (
 	"os"
 	"strconv"
 	"unicode"
-	"utf8"
+	"unicode/utf8"
 )
 
 const (
@@ -105,24 +105,20 @@ func usage() {
 
 var inputFilename string
 
-func (s *Sed) getNextScriptLine() ([]byte, os.Error) {
+func (s *Sed) getNextScriptLine() ([]byte, error) {
 	if s.scriptLineNumber < len(s.scriptLines) {
 		val := s.scriptLines[s.scriptLineNumber]
 		s.scriptLineNumber++
 		return val, nil
 	}
-	return nil, os.EOF
+	return nil, io.EOF
 }
 
 func trimSpaceFromBeginning(s []byte) []byte {
 	start, end := 0, len(s)
 	for start < end {
-		wid := 1
-		rune := int(s[start])
-		if rune >= utf8.RuneSelf {
-			rune, wid = utf8.DecodeRune(s[start:end])
-		}
-		if !unicode.IsSpace(rune) {
+		r, wid := utf8.DecodeRune(s[start:end])
+		if !unicode.IsSpace(r) {
 			break
 		}
 		start += wid
@@ -130,12 +126,12 @@ func trimSpaceFromBeginning(s []byte) []byte {
 	return s[start:end]
 }
 
-func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
+func (s *Sed) parseScript(scriptBuffer []byte) (err error) {
 	// a script may be a single command or it may be several
 	s.scriptLines = bytes.Split(scriptBuffer, newLine)
 	s.scriptLineNumber = 0
 	var line []byte
-	var serr os.Error
+	var serr error
 	for line, serr = s.getNextScriptLine(); serr == nil; line, serr = s.getNextScriptLine() {
 		// line = bytes.TrimSpace(line);
 		line = trimSpaceFromBeginning(line)
@@ -153,7 +149,7 @@ func (s *Sed) parseScript(scriptBuffer []byte) (err os.Error) {
 		}
 		c, err := NewCmd(s, line)
 		if err != nil {
-			fmt.Printf("Script error: %s -> %d: %s\n", err.String(), s.scriptLineNumber, line)
+			fmt.Printf("Script error: %s -> %d: %s\n", err.Error(), s.scriptLineNumber, line)
 			os.Exit(-1)
 		}
 		if _, ok := c.(*i_cmd); ok {
@@ -194,9 +190,9 @@ func (s *Sed) process() {
 	if *treat_files_as_seperate || *edit_inplace {
 		s.lineNumber = 0
 	}
-	var err os.Error
+	var err error
 	s.patternSpace, err = s.input.ReadSlice('\n')
-	for err != os.EOF {
+	for err != io.EOF {
 		lineLength := len(s.patternSpace)
 		if lineLength > 0 {
 			s.patternSpace = s.patternSpace[0 : lineLength-1]
@@ -206,7 +202,7 @@ func (s *Sed) process() {
 		s.lineNumber++
 		stop := false
 		// process i commands
-  	for c := s.beforeCommands.Front(); c != nil; c = c.Next() {
+		for c := s.beforeCommands.Front(); c != nil; c = c.Next() {
 			// ask the sed if we should process this command, based on address
 			if cmd, ok := c.Value.(*i_cmd); ok {
 				if c.Value.(Address).match(s.patternSpace, s.lineNumber) {
@@ -217,10 +213,10 @@ func (s *Sed) process() {
 		for c := s.commands.Front(); c != nil; c = c.Next() {
 			// ask the sed if we should process this command, based on address
 			if c.Value.(Address).match(s.patternSpace, s.lineNumber) {
-				var err os.Error
+				var err error
 				stop, err = c.Value.(Cmd).processLine(s)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error: %s\n", err.String())
+					fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 					fmt.Fprintf(os.Stderr, "Line: %d:%s\n", s.lineNumber, s.currentLine)
 					fmt.Fprintf(os.Stderr, "Command: %s\n", c.Value.(Cmd).String())
 					os.Exit(-1)
@@ -247,7 +243,7 @@ func (s *Sed) process() {
 }
 
 func Main() {
-	var err os.Error
+	var err error
 	s := new(Sed)
 	s.Init()
 	flag.Parse()
@@ -312,7 +308,7 @@ func Main() {
 
 	// parse script
 	s.parseScript(scriptBuffer)
-	
+
 	if currentFileParameter >= flag.NArg() {
 		if *edit_inplace {
 			fmt.Fprintf(os.Stderr, "Warning: Option -i ignored\n")
@@ -343,7 +339,7 @@ func Main() {
 				f, err := os.Create(tempFilename)
 				if err != nil {
 					s.inputFile.Close()
-					fmt.Fprintf(os.Stderr, "Error opening temp file file for inplace editing: %s\n", err.String())
+					fmt.Fprintf(os.Stderr, "Error opening temp file file for inplace editing: %s\n", err.Error())
 					os.Exit(-1)
 				}
 				s.outputFile = f
@@ -362,9 +358,9 @@ func Main() {
 					os.Exit(-1)
 				}
 				// reopen input file
-				s.inputFile, err = os.OpenFile(inputFilename, os.O_WRONLY|os.O_TRUNC, dir.Mode)
+				s.inputFile, err = os.OpenFile(inputFilename, os.O_WRONLY|os.O_TRUNC, dir.Mode())
 				if err != nil {
-					fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s\n", err.String())
+					fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s\n", err.Error())
 					// os.Remove(tempFilename);
 					os.Exit(-1)
 				}
@@ -373,7 +369,7 @@ func Main() {
 				s.outputFile.Close()
 				s.inputFile.Close()
 				if e != nil {
-					fmt.Fprintf(os.Stderr, "Error copying temp file back to input file: %s\nFull output is in %s", err.String(), tempFilename)
+					fmt.Fprintf(os.Stderr, "Error copying temp file back to input file: %s\nFull output is in %s", err.Error(), tempFilename)
 				} else {
 					os.Remove(tempFilename)
 				}

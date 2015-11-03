@@ -1,5 +1,5 @@
 //
-//  h_cmd.go
+//  r_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -26,59 +26,41 @@
 package sed
 
 import (
-	"bytes"
 	"fmt"
-	"os"
 )
 
-type h_cmd struct {
-	addr    *address
-	replace bool
+type r_cmd struct {
+	addr *address
+	text []byte
 }
 
-func (c *h_cmd) match(line []byte, lineNumber int) bool {
+func (c *r_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *h_cmd) String() string {
-	if c != nil {
-		if c.addr != nil {
-			if c.replace {
-				return fmt.Sprint("{h command with replace addr:%s}", c.addr.String())
-			} else {
-				return fmt.Sprint("{h command Cmd addr:%s}", c.addr.String())
-			}
-		} else {
-			if c.replace {
-				return fmt.Sprint("{h command with replace }")
-			} else {
-				return fmt.Sprint("{h command")
-			}
-		}
+func (c *r_cmd) String() string {
+	if c != nil && c.addr != nil {
+		return fmt.Sprintf("{r command addr:%s}", c.addr.String())
 	}
-	return fmt.Sprint("{h command}")
+	return fmt.Sprint("{r command}")
 }
 
-func (c *h_cmd) processLine(s *Sed) (bool, os.Error) {
-	if c.replace {
-		s.holdSpace = copyByteSlice(s.patternSpace)
-	} else {
-		buf := bytes.NewBuffer(s.patternSpace)
-		buf.WriteRune('\n')
-		buf.Write(s.holdSpace)
-		s.patternSpace = buf.Bytes()
+func (c *r_cmd) processLine(s *Sed) (bool, error) {
+	// print output space
+	if c.text != nil {
+		s.outputFile.Write(c.text)
 	}
 	return false, nil
 }
 
-func NewHCmd(pieces [][]byte, addr *address) (*h_cmd, os.Error) {
-	if len(pieces) > 1 {
-		return nil, WrongNumberOfCommandParameters
-	}
-	cmd := new(h_cmd)
-	if pieces[0][0] == 'h' {
-		cmd.replace = true
-	}
+func NewRCmd(line []byte, addr *address) (*r_cmd, error) {
+	line = line[1:]
+	cmd := new(r_cmd)
 	cmd.addr = addr
+	if len(line) > 0 {
+		cmd.text = line
+	} else {
+		cmd.text = nil
+	}
 	return cmd, nil
 }

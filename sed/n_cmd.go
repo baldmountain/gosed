@@ -1,5 +1,5 @@
 //
-//  d_cmd.go
+//  n_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -26,46 +26,36 @@
 package sed
 
 import (
-	"bytes"
 	"fmt"
-	"os"
 )
 
-type d_cmd struct {
-	addr             *address
-	upToFirstNewLine bool
+type n_cmd struct {
+	addr *address
 }
 
-func (c *d_cmd) match(line []byte, lineNumber int) bool {
+func (c *n_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *d_cmd) String() string {
+func (c *n_cmd) String() string {
 	if c != nil && c.addr != nil {
-		return fmt.Sprintf("{d command addr:%s}", c.addr.String())
+		return fmt.Sprint("{n command addr:%s}", c.addr.String())
 	}
-	return fmt.Sprintf("{d command}")
+	return fmt.Sprint("{n command}")
 }
 
-func (c *d_cmd) processLine(s *Sed) (bool, os.Error) {
-	if c.upToFirstNewLine {
-		idx := bytes.IndexByte(s.patternSpace, '\n')
-		if idx >= 0 && idx+1 < len(s.patternSpace) {
-			s.patternSpace = s.patternSpace[idx+1:]
-			return false, nil
-		}
+func (c *n_cmd) processLine(s *Sed) (bool, error) {
+	if !*quiet {
+		s.printPatternSpace()
 	}
 	return true, nil
 }
 
-func NewDCmd(pieces [][]byte, addr *address) (*d_cmd, os.Error) {
+func NewNCmd(pieces [][]byte, addr *address) (*n_cmd, error) {
 	if len(pieces) > 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(d_cmd)
-	if pieces[0][0] == 'D' {
-		cmd.upToFirstNewLine = true
-	}
+	cmd := new(n_cmd)
 	cmd.addr = addr
 	return cmd, nil
 }

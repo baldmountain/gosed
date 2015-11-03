@@ -1,5 +1,5 @@
 //
-//  q_cmd.go
+//  g_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -26,52 +26,58 @@
 package sed
 
 import (
+	"bytes"
 	"fmt"
-	"os"
-	"strconv"
 )
 
-type q_cmd struct {
-	addr      *address
-	exit_code int
+type g_cmd struct {
+	addr    *address
+	replace bool
 }
 
-func (c *q_cmd) match(line []byte, lineNumber int) bool {
+func (c *g_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *q_cmd) String() string {
+func (c *g_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{q command addr:%s with exit code: %d}", c.addr.String(), c.exit_code)
+			if c.replace {
+				return fmt.Sprint("{g command with replace addr:%s}", c.addr.String())
+			} else {
+				return fmt.Sprint("{g command addr:%s}", c.addr.String())
+			}
+		} else {
+			if c.replace {
+				return fmt.Sprint("{g command with replace}")
+			} else {
+				return fmt.Sprint("{Append a newline and the hold space to the pattern space}")
+			}
 		}
-		return fmt.Sprintf("{q command with exit code: %d}", c.exit_code)
 	}
-	return fmt.Sprint("{q command}")
+	return fmt.Sprint("{Append/Replace pattern space with contents of hold space}")
 }
 
-func NewQCmd(pieces [][]byte, addr *address) (c *q_cmd, err os.Error) {
-	err = nil
-	c = nil
-	switch len(pieces) {
-	case 2:
-		c = new(q_cmd)
-		c.addr = addr
-		c.exit_code, err = strconv.Atoi(string(pieces[1]))
-		if err != nil {
-			c = nil
-		}
-	case 1:
-		c = new(q_cmd)
-		c.addr = addr
-		c.exit_code = 0
-	default:
-		c, err = nil, WrongNumberOfCommandParameters
+func (c *g_cmd) processLine(s *Sed) (bool, error) {
+	if c.replace {
+		s.patternSpace = copyByteSlice(s.holdSpace)
+	} else {
+		buf := bytes.NewBuffer(s.patternSpace)
+		buf.WriteRune('\n')
+		buf.Write(s.holdSpace)
+		s.patternSpace = buf.Bytes()
 	}
-	return c, err
-}
-
-func (c *q_cmd) processLine(s *Sed) (stop bool, err os.Error) {
-	os.Exit(c.exit_code)
 	return false, nil
+}
+
+func NewGCmd(pieces [][]byte, addr *address) (*g_cmd, error) {
+	if len(pieces) > 1 {
+		return nil, WrongNumberOfCommandParameters
+	}
+	cmd := new(g_cmd)
+	if pieces[0][0] == 'g' {
+		cmd.replace = true
+	}
+	cmd.addr = addr
+	return cmd, nil
 }

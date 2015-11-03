@@ -1,5 +1,5 @@
 //
-//  i_cmd.go
+//  a_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -28,34 +28,33 @@ package sed
 import (
 	"bytes"
 	"fmt"
-	"os"
 )
 
-type i_cmd struct {
+type a_cmd struct {
 	addr *address
 	text []byte
 }
 
-func (c *i_cmd) match(line []byte, lineNumber int) bool {
+func (c *a_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *i_cmd) String() string {
+func (c *a_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{i command addr:%s text:%s}", c.addr.String(), string(c.text))
+			return fmt.Sprintf("{a command addr:%s text:%s}", c.addr.String(), c.text)
 		}
-		return fmt.Sprintf("{i command text:%s}", string(c.text))
+		return fmt.Sprintf("{a command text:%s}", c.text)
 	}
-	return fmt.Sprintf("{i command}")
+	return fmt.Sprintf("{a command}")
 }
 
-func (c *i_cmd) processLine(s *Sed) (bool, os.Error) {
+func (c *a_cmd) processLine(s *Sed) (bool, error) {
 	return false, nil
 }
 
-func NewICmd(s *Sed, line []byte, addr *address) (*i_cmd, os.Error) {
-	cmd := new(i_cmd)
+func NewACmd(s *Sed, line []byte, addr *address) (*a_cmd, error) {
+	cmd := new(a_cmd)
 	cmd.addr = addr
 	cmd.text = line[1:]
 	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
@@ -64,10 +63,11 @@ func NewICmd(s *Sed, line []byte, addr *address) (*i_cmd, os.Error) {
 		if err != nil {
 			break
 		}
-		// cmd.text = bytes.AddByte(cmd.text, '\n')
 		buf := bytes.NewBuffer(cmd.text)
+		buf.WriteRune('\n')
 		buf.Write(line)
-		s.patternSpace = buf.Bytes()
+		cmd.text = buf.Bytes()
 	}
+	cmd.text = trimSpaceFromBeginning(cmd.text)
 	return cmd, nil
 }

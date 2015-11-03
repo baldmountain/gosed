@@ -28,7 +28,6 @@ package sed
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 )
@@ -59,7 +58,7 @@ func (c *s_cmd) String() string {
 	return "{s command}"
 }
 
-func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
+func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err error) {
 	if len(pieces) != 4 {
 		return nil, WrongNumberOfCommandParameters
 	}
@@ -95,7 +94,7 @@ func NewSCmd(pieces [][]byte, addr *address) (c *s_cmd, err os.Error) {
 	return c, err
 }
 
-func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
+func (c *s_cmd) processLine(s *Sed) (stop bool, err error) {
 	stop, err = false, nil
 
 	switch c.nthOccurance {
@@ -111,22 +110,22 @@ func (c *s_cmd) processLine(s *Sed) (stop bool, err os.Error) {
 			if len(matches) > 0 {
 				count++
 				if count == c.nthOccurance {
-      		buf := bytes.NewBuffer(s.patternSpace)
-      		buf.Write(line[0:matches[0]])
-      		buf.Write(c.replace)
-      		buf.Write(line[matches[1]:])
-      		s.patternSpace = buf.Bytes()
+					buf := bytes.NewBuffer(s.patternSpace)
+					buf.Write(line[0:matches[0]])
+					buf.Write(c.replace)
+					buf.Write(line[matches[1]:])
+					s.patternSpace = buf.Bytes()
 					break
 				} else {
-      		buf := bytes.NewBuffer(s.patternSpace)
-      		buf.Write(line[0:matches[0]+1])
-      		s.patternSpace = buf.Bytes()
+					buf := bytes.NewBuffer(s.patternSpace)
+					buf.Write(line[0 : matches[0]+1])
+					s.patternSpace = buf.Bytes()
 				}
 				line = line[matches[0]+1:]
 			} else {
-    		buf := bytes.NewBuffer(s.patternSpace)
-    		buf.Write(line)
-    		s.patternSpace = buf.Bytes()
+				buf := bytes.NewBuffer(s.patternSpace)
+				buf.Write(line)
+				s.patternSpace = buf.Bytes()
 				break
 			}
 		}

@@ -1,5 +1,5 @@
 //
-//  a_cmd.go
+//  p_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -28,47 +28,41 @@ package sed
 import (
 	"bytes"
 	"fmt"
-	"os"
 )
 
-type a_cmd struct {
-	addr *address
-	text []byte
+type p_cmd struct {
+	addr        *address
+	upToNewLine bool
 }
 
-func (c *a_cmd) match(line []byte, lineNumber int) bool {
+func (c *p_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *a_cmd) String() string {
-	if c != nil {
-		if c.addr != nil {
-			return fmt.Sprintf("{a command addr:%s text:%s}", c.addr.String(), c.text)
-		}
-		return fmt.Sprintf("{a command text:%s}", c.text)
+func (c *p_cmd) String() string {
+	if c != nil && c.addr != nil {
+		return fmt.Sprintf("{p command addr:%s}", c.addr.String())
 	}
-	return fmt.Sprintf("{a command}")
+	return fmt.Sprint("{p command}")
 }
 
-func (c *a_cmd) processLine(s *Sed) (bool, os.Error) {
+func (c *p_cmd) processLine(s *Sed) (bool, error) {
+	// print output space
+	if c.upToNewLine {
+		firstLine := bytes.SplitN(s.patternSpace, []byte{'\n'}, 1)[0]
+		fmt.Fprintln(s.outputFile, string(firstLine))
+	} else {
+		fmt.Fprintln(s.outputFile, string(s.patternSpace))
+	}
 	return false, nil
 }
 
-func NewACmd(s *Sed, line []byte, addr *address) (*a_cmd, os.Error) {
-	cmd := new(a_cmd)
-	cmd.addr = addr
-	cmd.text = line[1:]
-	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
-		cmd.text = cmd.text[0 : len(cmd.text)-1]
-		line, err := s.getNextScriptLine()
-		if err != nil {
-			break
-		}
-		buf := bytes.NewBuffer(cmd.text)
-		buf.WriteRune('\n')
-		buf.Write(line)
-		cmd.text = buf.Bytes()
+func NewPCmd(pieces [][]byte, addr *address) (*p_cmd, error) {
+	if len(pieces) > 1 {
+		return nil, WrongNumberOfCommandParameters
 	}
-	cmd.text = trimSpaceFromBeginning(cmd.text)
+	cmd := new(p_cmd)
+	cmd.addr = addr
+	cmd.upToNewLine = pieces[0][0] == 'P'
 	return cmd, nil
 }

@@ -3,8 +3,4 @@
 *.8
 _obj
 main
-sed
-gosed
-6.out
-8.out
 _test

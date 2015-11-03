@@ -1,5 +1,5 @@
 //
-//  r_cmd.go
+//  c_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -26,42 +26,70 @@
 package sed
 
 import (
+	"bytes"
 	"fmt"
-	"os"
 )
 
-type r_cmd struct {
+type c_cmd struct {
 	addr *address
 	text []byte
 }
 
-func (c *r_cmd) match(line []byte, lineNumber int) bool {
+func (c *c_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *r_cmd) String() string {
-	if c != nil && c.addr != nil {
-		return fmt.Sprintf("{r command addr:%s}", c.addr.String())
+func (c *c_cmd) String() string {
+	if c != nil {
+		if c.addr != nil {
+			return fmt.Sprintf("{c command addr:%s text:%s}", c.addr.String(), c.text)
+		}
+		return fmt.Sprintf("{c command text:%s}", c.text)
 	}
-	return fmt.Sprint("{r command}")
+	return fmt.Sprintf("{c command}")
 }
 
-func (c *r_cmd) processLine(s *Sed) (bool, os.Error) {
-	// print output space
-	if c.text != nil {
-		s.outputFile.Write(c.text)
+func (c *c_cmd) printText(s *Sed) {
+	// we are going to get the newline from the
+	s.outputFile.Write(c.text)
+}
+
+func (c *c_cmd) processLine(s *Sed) (bool, error) {
+	s.patternSpace = s.patternSpace[0:0]
+	if c.addr != nil {
+		switch c.addr.address_type {
+		case ADDRESS_RANGE:
+			if s.lineNumber+1 == c.addr.rangeEnd {
+				c.printText(s)
+				return true, nil
+			}
+		case ADDRESS_LINE, ADDRESS_REGEX, ADDRESS_LAST_LINE:
+			c.printText(s)
+			return true, nil
+		case ADDRESS_TO_END_OF_FILE:
+			// FIX need to output at end of file
+		}
+	} else {
+		c.printText(s)
+		return true, nil
 	}
 	return false, nil
 }
 
-func NewRCmd(line []byte, addr *address) (*r_cmd, os.Error) {
-	line = line[1:]
-	cmd := new(r_cmd)
+func NewCCmd(s *Sed, line []byte, addr *address) (*c_cmd, error) {
+	cmd := new(c_cmd)
 	cmd.addr = addr
-	if len(line) > 0 {
-		cmd.text = line
-	} else {
-		cmd.text = nil
+	cmd.text = line[1:]
+	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
+		cmd.text = cmd.text[0 : len(cmd.text)-1]
+		line, err := s.getNextScriptLine()
+		if err != nil {
+			break
+		}
+		buf := bytes.NewBuffer(cmd.text)
+		buf.WriteRune('\n')
+		buf.Write(line)
+		cmd.text = buf.Bytes()
 	}
 	return cmd, nil
 }

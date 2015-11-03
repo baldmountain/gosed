@@ -28,7 +28,6 @@ package sed
 import (
 	"bytes"
 	"fmt"
-	"os"
 )
 
 type b_cmd struct {
@@ -50,11 +49,11 @@ func (c *b_cmd) String() string {
 	return fmt.Sprintf("{b command}")
 }
 
-func (c *b_cmd) processLine(s *Sed) (bool, os.Error) {
+func (c *b_cmd) processLine(s *Sed) (bool, error) {
 	return true, NotImplemented
 }
 
-func NewBCmd(pieces [][]byte, addr *address) (*b_cmd, os.Error) {
+func NewBCmd(pieces [][]byte, addr *address) (*b_cmd, error) {
 	if len(pieces) != 1 {
 		return nil, WrongNumberOfCommandParameters
 	}

@@ -1,5 +1,5 @@
 //
-//  g_cmd.go
+//  d_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -28,56 +28,42 @@ package sed
 import (
 	"bytes"
 	"fmt"
-	"os"
 )
 
-type g_cmd struct {
-	addr    *address
-	replace bool
+type d_cmd struct {
+	addr             *address
+	upToFirstNewLine bool
 }
 
-func (c *g_cmd) match(line []byte, lineNumber int) bool {
+func (c *d_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *g_cmd) String() string {
-	if c != nil {
-		if c.addr != nil {
-			if c.replace {
-				return fmt.Sprint("{g command with replace addr:%s}", c.addr.String())
-			} else {
-				return fmt.Sprint("{g command addr:%s}", c.addr.String())
-			}
-		} else {
-			if c.replace {
-				return fmt.Sprint("{g command with replace}")
-			} else {
-				return fmt.Sprint("{Append a newline and the hold space to the pattern space}")
-			}
+func (c *d_cmd) String() string {
+	if c != nil && c.addr != nil {
+		return fmt.Sprintf("{d command addr:%s}", c.addr.String())
+	}
+	return fmt.Sprintf("{d command}")
+}
+
+func (c *d_cmd) processLine(s *Sed) (bool, error) {
+	if c.upToFirstNewLine {
+		idx := bytes.IndexByte(s.patternSpace, '\n')
+		if idx >= 0 && idx+1 < len(s.patternSpace) {
+			s.patternSpace = s.patternSpace[idx+1:]
+			return false, nil
 		}
 	}
-	return fmt.Sprint("{Append/Replace pattern space with contents of hold space}")
+	return true, nil
 }
 
-func (c *g_cmd) processLine(s *Sed) (bool, os.Error) {
-	if c.replace {
-		s.patternSpace = copyByteSlice(s.holdSpace)
-	} else {
-		buf := bytes.NewBuffer(s.patternSpace)
-		buf.WriteRune('\n')
-		buf.Write(s.holdSpace)
-		s.patternSpace = buf.Bytes()
-	}
-	return false, nil
-}
-
-func NewGCmd(pieces [][]byte, addr *address) (*g_cmd, os.Error) {
+func NewDCmd(pieces [][]byte, addr *address) (*d_cmd, error) {
 	if len(pieces) > 1 {
 		return nil, WrongNumberOfCommandParameters
 	}
-	cmd := new(g_cmd)
-	if pieces[0][0] == 'g' {
-		cmd.replace = true
+	cmd := new(d_cmd)
+	if pieces[0][0] == 'D' {
+		cmd.upToFirstNewLine = true
 	}
 	cmd.addr = addr
 	return cmd, nil

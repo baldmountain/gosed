@@ -1,5 +1,5 @@
 //
-//  p_cmd.go
+//  q_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -26,44 +26,52 @@
 package sed
 
 import (
-	"bytes"
 	"fmt"
 	"os"
+	"strconv"
 )
 
-type p_cmd struct {
-	addr        *address
-	upToNewLine bool
+type q_cmd struct {
+	addr      *address
+	exit_code int
 }
 
-func (c *p_cmd) match(line []byte, lineNumber int) bool {
+func (c *q_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *p_cmd) String() string {
-	if c != nil && c.addr != nil {
-		return fmt.Sprintf("{p command addr:%s}", c.addr.String())
+func (c *q_cmd) String() string {
+	if c != nil {
+		if c.addr != nil {
+			return fmt.Sprintf("{q command addr:%s with exit code: %d}", c.addr.String(), c.exit_code)
+		}
+		return fmt.Sprintf("{q command with exit code: %d}", c.exit_code)
 	}
-	return fmt.Sprint("{p command}")
+	return fmt.Sprint("{q command}")
 }
 
-func (c *p_cmd) processLine(s *Sed) (bool, os.Error) {
-	// print output space
-	if c.upToNewLine {
-		firstLine := bytes.SplitN(s.patternSpace, []byte{'\n'}, 1)[0]
-		fmt.Fprintln(s.outputFile, string(firstLine))
-	} else {
-		fmt.Fprintln(s.outputFile, string(s.patternSpace))
+func NewQCmd(pieces [][]byte, addr *address) (c *q_cmd, err error) {
+	err = nil
+	c = nil
+	switch len(pieces) {
+	case 2:
+		c = new(q_cmd)
+		c.addr = addr
+		c.exit_code, err = strconv.Atoi(string(pieces[1]))
+		if err != nil {
+			c = nil
+		}
+	case 1:
+		c = new(q_cmd)
+		c.addr = addr
+		c.exit_code = 0
+	default:
+		c, err = nil, WrongNumberOfCommandParameters
 	}
+	return c, err
+}
+
+func (c *q_cmd) processLine(s *Sed) (stop bool, err error) {
+	os.Exit(c.exit_code)
 	return false, nil
-}
-
-func NewPCmd(pieces [][]byte, addr *address) (*p_cmd, os.Error) {
-	if len(pieces) > 1 {
-		return nil, WrongNumberOfCommandParameters
-	}
-	cmd := new(p_cmd)
-	cmd.addr = addr
-	cmd.upToNewLine = pieces[0][0] == 'P'
-	return cmd, nil
 }

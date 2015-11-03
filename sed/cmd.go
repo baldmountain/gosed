@@ -27,25 +27,25 @@ package sed
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 )
 
 var (
-	WrongNumberOfCommandParameters os.Error = os.NewError("Wrong number of parameters for command")
-	UnknownScriptCommand           os.Error = os.NewError("Unknown script command")
-	InvalidSCommandFlag            os.Error = os.NewError("Invalid flag for s command")
-	RegularExpressionExpected      os.Error = os.NewError("Expected a regular expression, got zero length string")
-	UnterminatedRegularExpression  os.Error = os.NewError("Unterminated regular expression")
-	NoSupportForTwoAddress         os.Error = os.NewError("This command doesn't support an address range or to end of file")
-	NotImplemented                 os.Error = os.NewError("This command command hasn't been implemented yet")
+	WrongNumberOfCommandParameters error = errors.New("Wrong number of parameters for command")
+	UnknownScriptCommand           error = errors.New("Unknown script command")
+	InvalidSCommandFlag            error = errors.New("Invalid flag for s command")
+	RegularExpressionExpected      error = errors.New("Expected a regular expression, got zero length string")
+	UnterminatedRegularExpression  error = errors.New("Unterminated regular expression")
+	NoSupportForTwoAddress         error = errors.New("This command doesn't support an address range or to end of file")
+	NotImplemented                 error = errors.New("This command command hasn't been implemented yet")
 )
 
 type Cmd interface {
 	fmt.Stringer
-	processLine(s *Sed) (stop bool, err os.Error)
+	processLine(s *Sed) (stop bool, err error)
 }
 
 type Address interface {
@@ -116,7 +116,7 @@ func (a *address) match(line []byte, lineNumber int) bool {
 	return val
 }
 
-func getNumberFromLine(s []byte) ([]byte, int, os.Error) {
+func getNumberFromLine(s []byte) ([]byte, int, error) {
 	idx := 0
 	for {
 		if s[idx] < '0' || s[idx] > '9' {
@@ -132,8 +132,8 @@ func getNumberFromLine(s []byte) ([]byte, int, os.Error) {
 }
 
 // A nil address means match any line
-func checkForAddress(s []byte) ([]byte, *address, os.Error) {
-	var err os.Error
+func checkForAddress(s []byte) ([]byte, *address, error) {
+	var err error
 	if s[0] == '/' {
 		// regular expression address
 		s = s[1:]
@@ -196,9 +196,9 @@ func checkForAddress(s []byte) ([]byte, *address, os.Error) {
 	return s, nil, nil
 }
 
-func NewCmd(s *Sed, line []byte) (Cmd, os.Error) {
+func NewCmd(s *Sed, line []byte) (Cmd, error) {
 
-	var err os.Error
+	var err error
 	var addr *address
 	line, addr, err = checkForAddress(line)
 	if err != nil {

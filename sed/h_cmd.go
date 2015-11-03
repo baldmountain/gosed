@@ -1,5 +1,5 @@
 //
-//  c_cmd.go
+//  h_cmd.go
 //  sed
 //
 // Copyright (c) 2009 Geoffrey Clements
@@ -28,69 +28,56 @@ package sed
 import (
 	"bytes"
 	"fmt"
-	"os"
 )
 
-type c_cmd struct {
-	addr *address
-	text []byte
+type h_cmd struct {
+	addr    *address
+	replace bool
 }
 
-func (c *c_cmd) match(line []byte, lineNumber int) bool {
+func (c *h_cmd) match(line []byte, lineNumber int) bool {
 	return c.addr.match(line, lineNumber)
 }
 
-func (c *c_cmd) String() string {
+func (c *h_cmd) String() string {
 	if c != nil {
 		if c.addr != nil {
-			return fmt.Sprintf("{c command addr:%s text:%s}", c.addr.String(), c.text)
-		}
-		return fmt.Sprintf("{c command text:%s}", c.text)
-	}
-	return fmt.Sprintf("{c command}")
-}
-
-func (c *c_cmd) printText(s *Sed) {
-	// we are going to get the newline from the
-	s.outputFile.Write(c.text)
-}
-
-func (c *c_cmd) processLine(s *Sed) (bool, os.Error) {
-	s.patternSpace = s.patternSpace[0:0]
-	if c.addr != nil {
-		switch c.addr.address_type {
-		case ADDRESS_RANGE:
-			if s.lineNumber+1 == c.addr.rangeEnd {
-				c.printText(s)
-				return true, nil
+			if c.replace {
+				return fmt.Sprint("{h command with replace addr:%s}", c.addr.String())
+			} else {
+				return fmt.Sprint("{h command Cmd addr:%s}", c.addr.String())
 			}
-		case ADDRESS_LINE, ADDRESS_REGEX, ADDRESS_LAST_LINE:
-			c.printText(s)
-			return true, nil
-		case ADDRESS_TO_END_OF_FILE:
-			// FIX need to output at end of file
+		} else {
+			if c.replace {
+				return fmt.Sprint("{h command with replace }")
+			} else {
+				return fmt.Sprint("{h command")
+			}
 		}
+	}
+	return fmt.Sprint("{h command}")
+}
+
+func (c *h_cmd) processLine(s *Sed) (bool, error) {
+	if c.replace {
+		s.holdSpace = copyByteSlice(s.patternSpace)
 	} else {
-		c.printText(s)
-		return true, nil
+		buf := bytes.NewBuffer(s.patternSpace)
+		buf.WriteRune('\n')
+		buf.Write(s.holdSpace)
+		s.patternSpace = buf.Bytes()
 	}
 	return false, nil
 }
 
-func NewCCmd(s *Sed, line []byte, addr *address) (*c_cmd, os.Error) {
-	cmd := new(c_cmd)
-	cmd.addr = addr
-	cmd.text = line[1:]
-	for bytes.HasSuffix(cmd.text, []byte{'\\'}) {
-		cmd.text = cmd.text[0 : len(cmd.text)-1]
-		line, err := s.getNextScriptLine()
-		if err != nil {
-			break
-		}
-		buf := bytes.NewBuffer(cmd.text)
-		buf.WriteRune('\n')
-		buf.Write(line)
-		cmd.text = buf.Bytes()
+func NewHCmd(pieces [][]byte, addr *address) (*h_cmd, error) {
+	if len(pieces) > 1 {
+		return nil, WrongNumberOfCommandParameters
 	}
+	cmd := new(h_cmd)
+	if pieces[0][0] == 'h' {
+		cmd.replace = true
+	}
+	cmd.addr = addr
 	return cmd, nil
 }
