@@ -1,3 +1,5 @@
+# gosed
+
 This is my Go language learning project. It's a basic implementation of the
 utility sed. I'm not really looking for criticism, but if someone wants to
 help out turning this int a real sed I wouldn't mind.

@@ -32,7 +32,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"unicode"
@@ -257,23 +256,20 @@ func Main() {
 
 	// the first parameter may be a script or an input file. This helps us track which
 	currentFileParameter := 0
-	var scriptBuffer []byte = make([]byte, 0)
+	var scriptBuffer []byte
 
 	// we need a script
 	if len(*script) == 0 {
 		// no -e so try -f
 		if len(*script_file) > 0 {
-			sb, err := ioutil.ReadFile(*script_file)
+			sb, err := os.ReadFile(*script_file)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Error reading script file %s\n", *script_file)
 				os.Exit(-1)
 			}
 			scriptBuffer = sb
 		} else if flag.NArg() > 1 {
-			scriptBuffer := make([]byte, len(flag.Arg(0)))
-			for i := 0; i < len(flag.Arg(0)); i++ {
-				scriptBuffer[i] = flag.Arg(0)[i]
-			}
+			scriptBuffer = []byte(flag.Arg(0))
 
 			// change semicoluns to newlines for scripts on command line
 			idx := bytes.IndexByte(scriptBuffer, ';')
@@ -286,10 +282,7 @@ func Main() {
 			currentFileParameter++
 		}
 	} else {
-		scriptBuffer := make([]byte, len(*script))
-		for i := 0; i < len(*script); i++ {
-			scriptBuffer[i] = (*script)[i]
-		}
+		scriptBuffer = []byte(*script)
 		// change semicoluns to newlines for scripts on command line
 		idx := bytes.IndexByte(scriptBuffer, ';')
 		for idx >= 0 {
@@ -360,7 +353,7 @@ func Main() {
 				// reopen input file
 				s.inputFile, err = os.OpenFile(inputFilename, os.O_WRONLY|os.O_TRUNC, dir.Mode())
 				if err != nil {
-					fmt.Fprint(os.Stderr, "Error opening input file for inplace editing: %s\n", err.Error())
+					fmt.Fprintf(os.Stderr, "Error opening input file for in place editing: %s\n", err.Error())
 					// os.Remove(tempFilename);
 					os.Exit(-1)
 				}
